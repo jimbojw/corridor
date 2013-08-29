@@ -76,14 +76,14 @@ var
         value = JSON.stringify(value);
       }
       
-      
-      
       upwalk(elem, root, function(elem, field, opts) {
         if (field !== undefined) {
           value = field.replace('$$$', value);
         }
       });
-      log(value);
+      
+      // TODO: deep merge value into data
+      
     });
     
   },
@@ -309,6 +309,89 @@ var
       }
     }
     return obj;
+  },
+  
+  /**
+   * Deep merge two plain object heirarchies.
+   * Does not check for hasOwnProperty.
+   * Does not deal with cyclical references (at all).
+   * Concatenates arrays (rather than trying to merge their elements).
+   * Doesn't guarantee that new cyclical relationships won't be created.
+   * Doesn't guarantee good behavior when asymentrical types are encountered.
+   */
+  merge = corridor.merge = function(obj, other) {
+    
+    var key;
+    
+    if (toString.call(other) === '[object Array]') {
+      if (toString.call(obj) === '[object Array]') {
+        other.forEach(function(item){
+          obj.push(item);
+        });
+      } else {
+        other.forEach(function(item, index) {
+          if (index in obj && typeof obj[index] === 'object' && obj[index] !== null) {
+            merge(obj[index], item);
+          } else {
+            obj[index] = item;
+          }
+        });
+      }
+    } else {
+      for (key in other) {
+        if (key in obj && typeof obj[key] === 'object' && obj[key] !== null) {
+          merge(obj[key], other[key]);
+        } else {
+          obj[key] = other[key];
+        }
+      }
+    }
+    
+    return obj;
+  },
+  
+  /**
+   * TODO: move this to a test suite.
+   */
+  testMerge = corridor.testMerge = function() {
+    ([
+      {
+        obj: ['a'],
+        other: ['b'],
+        expected: ['a', 'b']
+      },
+      {
+        obj: [{a: 'hi'}],
+        other: [{b: 'there'}],
+        expected: [{a: 'hi'}, {b: 'there'}]
+      },
+      {
+        obj: {list: ['hi']},
+        other: {list: ['there']},
+        expected: {list: ['hi','there']}
+      },
+      {
+        obj: {list: ['hi'], foo: 7},
+        other: {foo: 8, list: ['there']},
+        expected: {list: ['hi','there'], foo: 8}
+      },
+      {
+        obj: {},
+        other: { b: 'hi' },
+        expected: { b: 'hi' }
+      },
+      {
+        obj: { a: 'whut' },
+        other: { b: 'hi' },
+        expected: { a: 'whut', b: 'hi' }
+      },
+    ]).forEach(function(test) {
+      var actual = merge(test.obj, test.other);
+      if (JSON.stringify(actual) !== JSON.stringify(test.expected)) {
+        console.log(["FAILED", test.expected, actual]);
+      }
+    });
+    console.log("PASS");
   };
 
 })(window, document);
