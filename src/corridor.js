@@ -56,14 +56,13 @@ var
           return;
         }
         
+        // create type-specific value string
         value = JSON.stringify(coerce(value, opts.type, opts));
         
-        upwalk(elem, root, function(elem, field, opts) {
-          if (field !== undefined) {
-            value = field.replace('$$$', value);
-          }
-        });
+        // build out full contribution
+        value = buildup(value, elem, root);
         
+        // merge contribution into the result data
         merge(data, JSON.parse(value));
         
       });
@@ -79,50 +78,79 @@ var
    */
   insert = corridor.insert = function(root, data) {
     
+    // data structure for existing fields
+    // used to figure out true contribution paths for inserting data into elements
+    var workspace = {};
+    
+    // for each value'd, enabled data-field
     slice.call(root.querySelectorAll('[data-field]'))
       .filter(hasVal)
-      .forEach(function(elem) { 
-      
-        var
-          opts = options(elem, defaults),
-          target = JSON.stringify("\ufff0"),
-          queue,
-          path,
-          value,
-          node;
+      .filter(enabled)
+      .map(function(elem) {
         
-        // build up nested representation and parse it out
-        upwalk(elem, root, function(elem, field, opts) {
-          if (field !== undefined) {
-            target = field.replace('$$$', target);
-          }
-        });
-        target = JSON.parse(target);
+        var target, queue, path;
         
-        // find path to target value
-        queue = [[target, []]];
+        // build up the target contribution
+        // starting with "\ufff0" value tag
+        target = JSON.parse(buildup(JSON.stringify("\ufff0"), elem, root));
+        
+        // insert into workspace
+        merge(workspace, target);
+        
+        // find path to target in workspace
+        queue = [[workspace, []]];
         while (!path && queue.length) {
           path = (function(node, stubPath){
-            var k, nextPath;
-            for (k in node) {
-              nextPath = stubPath.concat([k]);
-              if (node[k] === "\ufff0") {
-                return nextPath;
-              } else {
-                queue.push([node[k], nextPath]);
+            var i, ii, k, nextPath;
+            if (toString.call(node) === '[object Array]') {
+              for (i = 0, ii = node.length; i < ii; i++) {
+                nextPath = stubPath.concat([i]);
+                if (node[i] === "\ufff0") {
+                  return nextPath;
+                } else {
+                  queue.push([node[i], nextPath]);
+                }
+              }
+            } else {
+              for (k in node) {
+                nextPath = stubPath.concat([k]);
+                if (node[k] === "\ufff0") {
+                  return nextPath;
+                } else {
+                  queue.push([node[k], nextPath]);
+                }
               }
             }
           }).apply(null, queue.shift());
         }
         
-        // walk down data object, following path to final node
-        node = data;
-        while (node && path.length) {
-          node = node[path.shift()];
-        }
+        // set actual val into workspace to prevent false hits for future fields
+        (function(pathCopy){
+          var
+            opts = options(elem, defaults),
+            node = workspace;
+          while (pathCopy.length > 1) {
+            node = node[pathCopy.shift()];
+          }
+          node[pathCopy[0]] = coerce(val(elem), opts.type, opts)
+        })(path.slice(0));
         
-        // last chance for value coercion, then set the val
-        value = node;
+        // emit path/elem tuple
+        return {path:path, elem:elem};
+        
+      })
+      .forEach(function(tuple){
+        
+        var
+          // for each path/elem pair
+          path = tuple.path,
+          elem = tuple.elem,
+          opts = options(elem),
+          
+          // walk down input data object, following path to final node
+          value = follow(path, data);
+        
+        // last chance for value coercion, then assign val to elem
         if (value === undefined) {
           return;
         } else if (opts.type === 'json') {
@@ -210,6 +238,36 @@ var
       elem = (elem === root) ? null : elem.parentNode;
     }
     return true;
+  },
+  
+  /**
+   * Walk up the parent chain and perform replacements to build up full contribution.
+   * @param {string} value Starting value, must be a string.
+   * @param {HTMLElement} elem The element to start walking up from.
+   * @param {HTMLElement} root The topmost/stop element (optional).
+   * @return {string} The built up contribution string.
+   */
+  buildup = corridor.buildup = function(value, elem, root) {
+    upwalk(elem, root || null, function(elem, field, opts) {
+      if (field !== undefined) {
+        value = field.replace('$$$', value);
+      }
+    });
+    return value;
+  },
+  
+  /**
+   * Follow a given path down a data object to find the bottom node.
+   * If the path can't be followed all the way down, this function returns undefined.
+   * @param {array} path Array of keys to use to walk down node.
+   * @param {mixed} node The starting node to traverse down.
+   * @return {mixed} The final node at the bottom of the path if discoverable.
+   */
+  follow = corridor.follow = function(path, node) {
+    while (node && path.length) {
+      node = node[path.shift()];
+    }
+    return node;
   },
   
   /**
