@@ -8,7 +8,7 @@ Data binding without the fuss.
 corridor is just a single js file.
 You can grab corridor.js out of this repo.
 
-## Using corridor
+## using corridor
 
 The corridor library has only one function called `corridor()`.
 This function does one of two things:
@@ -23,7 +23,7 @@ We'll build out a single-page web app for manipulating a package.json file.
 
 To skip to the outcome of this walkthrough, see the `example.html` file.
 
-### package.json data
+### package.json example app
 
 For a `package.json`, you need at least the following data:
 
@@ -198,6 +198,7 @@ corridor(document.body, {
   name: "foo",
   keywords: ["bar", "baz"]
 });
+```
 
 corridor uses the same `data-field` and `data-opts` parameters to determine where data values should be inserted.
 
