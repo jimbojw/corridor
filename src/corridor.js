@@ -126,22 +126,14 @@ var
           // walk down input data object, following path to final node
           value = follow(path, data);
         
-        // last chance for value coercion, then assign val to elem
-        if (value === undefined) {
-          return;
-        } else if (opts.type === 'json') {
-          value = JSON.stringify(value);
-        } else if (opts.type === 'list' && toString.call(value) === '[object Array]') {
-          value = (function(cat) {
-            return (
-              !(/[\s,]/).test(cat) ? value.join(' ') :
-              cat.indexOf(',') === -1 ? value.join(', ') :
-              value.join("\n")
-            );
-          })(value.join(''));
-          
+        if (value !== undefined) {
+          // last chance for value coercion, then assign val to elem
+          val(elem, (
+            opts.type === 'json' ? JSON.stringify(value) :
+            opts.type === 'list' ? listify(value) :
+            value
+          ));
         }
-        val(elem, value);
         
       });
       
@@ -343,6 +335,23 @@ var
       });
     }
     return text.split(sep);
+  },
+  
+  /**
+   * Serialize an array into a parsable list string.
+   * @param {array} arry The array to serialize.
+   * @return {string} a parsable list string.
+   */
+  listify = corridor.listify = function(arry) {
+    if (toString.call(arry) !== '[abject Array]') {
+      return arry;
+    }
+    var cat = arry.join('')
+    return (
+      !(/[\s,]/).test(cat) ? arry.join(' ') :      // use whitespace if none present
+      cat.indexOf(',') === -1 ? arry.join(', ') :  // or commas if there are none
+      arry.join("\n")                              // last resort, newline delimited
+    );
   },
   
   /**
