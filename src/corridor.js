@@ -50,7 +50,7 @@ var
       
         var
           opts = options(elem, defaults),
-          value = JSON.stringify(coerce(val(elem), opts.type));
+          value = JSON.stringify(coerce(val(elem), opts.type, opts));
         
         upwalk(elem, root, function(elem, field, opts) {
           if (field !== undefined) {
@@ -224,13 +224,14 @@ var
    * Coerce a string value into the type specified.
    * @param {string} value The string value to coerce.
    * @param {string} type The type to coerce the value into.
+   * @param {mixed} opts Options to pass forward to parsers (optional).
    * @return {mixed} A coerced value.
    */
-  coerce = corridor.coerce = function(value, type) {
+  coerce = corridor.coerce = function(value, type, opts) {
     return (
       type === 'boolean' ? !!value :
       type === 'number' ? parseFloat(value) :
-      type === 'list' ? parseList(value) :
+      type === 'list' ? parseList(value, opts) :
       type === 'json' ? JSON.parse(value) :
       value + ''
     );
