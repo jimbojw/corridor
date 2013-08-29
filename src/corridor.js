@@ -43,26 +43,14 @@ var
     
     var data = {};
       
-    slice.call(root.querySelectorAll('[data-field]')).filter(enabled)
+    slice.call(root.querySelectorAll('[data-field]'))
+      .filter(hasVal)
+      .filter(enabled)
       .forEach(function(elem) { 
       
         var
           opts = options(elem, defaults),
-          value = val(elem);
-        
-        if (opts.type === 'boolean') {
-          value = !!value;
-        } else if (opts.type === 'number') {
-          value = parseFloat(value);
-        } else if (opts.type === 'list') {
-          value = parseList(value);
-        } else if (opts.type === 'json') {
-          value = JSON.parse(value);
-        } else {
-          value = value + '';
-        }
-        
-        value = JSON.stringify(value);
+          value = JSON.stringify(coerce(val(elem), opts.type));
         
         upwalk(elem, root, function(elem, field, opts) {
           if (field !== undefined) {
@@ -80,17 +68,64 @@ var
   
   /**
    * Insert data into the DOM under the specified element from provided data.
-   * @param {HTMLElement} elem The element to scan for data.
+   * @param {HTMLElement} root The element to scan for insertion fields.
    * @param {mixed} data The data to insert.
    */
-  insert = corridor.insert = function(elem, data) {
+  insert = corridor.insert = function(root, data) {
     
-    var
+    slice.call(root.querySelectorAll('[data-field]'))
+      .filter(hasVal)
+      .forEach(function(elem) { 
       
-      fields = elem.querySelectorAll('[data-field]');
-      
-    console.log(fields);
-    
+        var
+          opts = options(elem, defaults),
+          target = JSON.stringify("\ufff0"),
+          queue,
+          path,
+          value,
+          node;
+        
+        // build up nested representation and parse it out
+        upwalk(elem, root, function(elem, field, opts) {
+          if (field !== undefined) {
+            target = field.replace('$$$', target);
+          }
+        });
+        target = JSON.parse(target);
+        
+        // find path to target value
+        queue = [[target, []]];
+        while (!path && queue.length) {
+          path = (function(node, stubPath){
+            var k, nextPath;
+            for (k in node) {
+              nextPath = stubPath.concat([k]);
+              if (node[k] === "\ufff0") {
+                return nextPath;
+              } else {
+                queue.push([node[k], nextPath]);
+              }
+            }
+          }).apply(null, queue.shift());
+        }
+        
+        // walk down data object, following path to final node
+        node = data;
+        while (node && path.length) {
+          node = node[path.shift()];
+        }
+        
+        // last chance for value coercion, then set the val
+        value = node;
+        if (value === undefined) {
+          return;
+        } else if (opts.type === 'json') {
+          value = JSON.stringify(value);
+        }
+        val(elem, value);
+        
+      });
+        
   },
   
   /**
@@ -174,6 +209,22 @@ var
         return false; // short-circuit upwalk();
       }
     });
+  },
+  
+  /**
+   * Coerce a string value into the type specified.
+   * @param {string} value The string value to coerce.
+   * @param {string} type The type to coerce the value into.
+   * @return {mixed} A coerced value.
+   */
+  coerce = corridor.coerce = function(value, type) {
+    return (
+      type === 'boolean' ? !!value :
+      type === 'number' ? parseFloat(value) :
+      type === 'list' ? parseList(value) :
+      type === 'json' ? JSON.parse(value) :
+      value + ''
+    );
   },
   
   /**
@@ -297,6 +348,14 @@ var
    */
   setVal = val.setVal = function(elem, value) {
     elem.value = value;
+  },
+  
+  /**
+   * Determine whether a specified element could have or receive a val.
+   * @param {HTMLElement} elem The element to test.
+   */
+  hasVal = val.hasVal = function(elem) {
+    return (/^(input|textarea|select)$/i).test(elem.tagName.toLowerCase());
   },
   
   /**
