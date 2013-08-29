@@ -39,52 +39,42 @@ var
    */
   extract = corridor.extract = function(root) {
     
-    var
-      
-      data = {},
-      
-      fields =
-        slice.call(root.querySelectorAll('[data-field]'))
-        .filter(function(elem) {
-          var enabled = true;
-          upwalk(elem.parentNode, root, function(parent, field, opts) {
-            if (opts.role === 'toggleable' && !toggled(parent)) {
-              enabled = false;
-              return false; // short-circuit upwalk();
-            }
-          });
-          return enabled;
-        });
+    root = root || document;
     
-    fields.forEach(function(elem) { 
+    var data = {};
       
-      var
-        opts = options(elem, defaults),
-        value = val(elem);
+    slice.call(root.querySelectorAll('[data-field]')).filter(enabled)
+      .forEach(function(elem) { 
       
-      if (opts.type === 'boolean') {
-        value = !!value;
-      } else if (opts.type === 'number') {
-        value = parseFloat(value);
-      } else if (opts.type === 'list') {
-        value = parseList(value);
-      }
-      
-      if (opts.type === 'json') {
-        throw Error('JSON processing not yet implemented.');
-      } else {
-        value = JSON.stringify(value);
-      }
-      
-      upwalk(elem, root, function(elem, field, opts) {
-        if (field !== undefined) {
-          value = field.replace('$$$', value);
+        var
+          opts = options(elem, defaults),
+          value = val(elem);
+        
+        if (opts.type === 'boolean') {
+          value = !!value;
+        } else if (opts.type === 'number') {
+          value = parseFloat(value);
+        } else if (opts.type === 'list') {
+          value = parseList(value);
+        } else if (opts.type === 'json') {
+          value = JSON.parse(value);
+        } else {
+          value = value + '';
         }
+        
+        value = JSON.stringify(value);
+        
+        upwalk(elem, root, function(elem, field, opts) {
+          if (field !== undefined) {
+            value = field.replace('$$$', value);
+          }
+        });
+        
+        merge(data, JSON.parse(value));
+        
       });
-      
-      // TODO: deep merge value into data
-      
-    });
+    
+    return data;
     
   },
   
@@ -170,6 +160,20 @@ var
       elem = (elem === root) ? null : elem.parentNode;
     }
     return true;
+  },
+  
+  /**
+   * Figure out whether an element is eligible for inclusion by traversing the DOM.
+   * @param {HTMLElement} elem The element to start from.
+   * @param {HTMLElement} root Element to stop on / topmost element (optional).
+   * @return {boolean} True if there are no toggled toggleable ancestors before or including the root.
+   */
+  enabled = corridor.enabled = function(elem, root) {
+    return upwalk(elem.parentNode, root || null, function(parent, field, opts) {
+      if (opts.role === 'toggleable' && !toggled(parent)) {
+        return false; // short-circuit upwalk();
+      }
+    });
   },
   
   /**

@@ -69,7 +69,6 @@
         </label>
       </p>
     </div>
-  </div>
     <div data-opts='{"role":"toggleable"}'>
       <p>
         <label>
@@ -98,7 +97,7 @@ var
 
 // extract button should send data to textarea
 document.querySelector('.extract').addEventListener('click', function(e) {
-  output.textContent = corridor(input);
+  output.textContent = JSON.stringify(corridor(input), null, '  ');
 }, false);
 
 document.querySelector('.insert').addEventListener('click', function(e) {
