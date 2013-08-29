@@ -88,7 +88,7 @@ var
       .filter(enabled)
       .map(function(elem) {
         
-        var target, queue, path;
+        var target, path;
         
         // build up the target contribution
         // starting with "\ufff0" value tag
@@ -98,31 +98,7 @@ var
         merge(workspace, target);
         
         // find path to target in workspace
-        queue = [[workspace, []]];
-        while (!path && queue.length) {
-          path = (function(node, stubPath){
-            var i, ii, k, nextPath;
-            if (toString.call(node) === '[object Array]') {
-              for (i = 0, ii = node.length; i < ii; i++) {
-                nextPath = stubPath.concat([i]);
-                if (node[i] === "\ufff0") {
-                  return nextPath;
-                } else {
-                  queue.push([node[i], nextPath]);
-                }
-              }
-            } else {
-              for (k in node) {
-                nextPath = stubPath.concat([k]);
-                if (node[k] === "\ufff0") {
-                  return nextPath;
-                } else {
-                  queue.push([node[k], nextPath]);
-                }
-              }
-            }
-          }).apply(null, queue.shift());
-        }
+        path = locate(workspace, "\ufff0");
         
         // set actual val into workspace to prevent false hits for future fields
         (function(pathCopy){
@@ -268,6 +244,46 @@ var
       node = node[path.shift()];
     }
     return node;
+  },
+  
+  /**
+   * Starting from a given data node, locate the specified value and report its path.
+   * @param {mixed} node The starting data node to traverse.
+   * @param {mixed} value The value to locate (by strict equality check).
+   * @return {array} An array of keys pointing to the value, or undefined if not found.
+   */
+  locate = corridor.locate = function(node, value) {
+    
+    var
+      queue = [[node, []]],
+      path;
+    
+    while (!path && queue.length) {
+      path = (function(node, stubPath){
+        var i, ii, k, nextPath;
+        if (toString.call(node) === '[object Array]') {
+          for (i = 0, ii = node.length; i < ii; i++) {
+            nextPath = stubPath.concat([i]);
+            if (node[i] === value) {
+              return nextPath;
+            } else {
+              queue.push([node[i], nextPath]);
+            }
+          }
+        } else {
+          for (k in node) {
+            nextPath = stubPath.concat([k]);
+            if (node[k] === value) {
+              return nextPath;
+            } else {
+              queue.push([node[k], nextPath]);
+            }
+          }
+        }
+      }).apply(null, queue.shift());
+    }
+    
+    return path;
   },
   
   /**
