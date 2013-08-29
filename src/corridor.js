@@ -50,7 +50,13 @@ var
       
         var
           opts = options(elem, defaults),
-          value = JSON.stringify(coerce(val(elem), opts.type, opts));
+          value = val(elem);
+        
+        if (opts.empty === 'omit' && !value) {
+          return;
+        }
+        
+        value = JSON.stringify(coerce(value, opts.type, opts));
         
         upwalk(elem, root, function(elem, field, opts) {
           if (field !== undefined) {
