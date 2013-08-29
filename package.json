@@ -1,7 +1,7 @@
 {
   "name": "corridor",
-  "version": "0.1.0",
-  "description": "JSON/DOM data corridor.",
+  "version": "0.1.1",
+  "description": "JSON/DOM data corridor for data-binding",
   "repository": {
     "type": "git",
     "url": "git@github.com:jimbojw/corridor.git"
@@ -9,6 +9,7 @@
   "keywords": [
     "json",
     "dom",
+    "data-binding",
     "corridor"
   ],
   "author": "jimbojw",

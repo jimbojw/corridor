@@ -6,7 +6,13 @@ Data binding without the fuss.
 ## getting corridor
 
 corridor is just a single js file.
-You can grab corridor.js out of this repo.
+
+* from github: grab [corridor.js](https://github.com/jimbojw/corridor/blob/master/src/corridor.js) out of the [corridor repo](https://github.com/jimbojw/corridor)
+* from npm: 
+
+```sh
+$ npm install corridor
+```
 
 ## using corridor
 
