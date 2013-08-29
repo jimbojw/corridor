@@ -83,6 +83,24 @@
         </label>
       </p>
     </div>
+    <div data-opts='{"role":"toggleable"}'>
+      <p>
+        <label>
+          <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+          include dependencies?
+        </label>
+      </p>
+      <p>
+        <label>
+          foo:
+          <select data-field='{"dependencies":$$$}' data-opts='{"type":"json"}'>
+            <option value='{"foo":"~0.1.0"}'>foo: ~0.1.0</option>
+            <option value='{"bar":"~1.1.0"}'>bar: ~1.1.0</option>
+            <option value='{"baz":"~2.1.0"}'>baz: ~2.1.0</option>
+          </select>
+        </label>
+      </p>
+    </div>
   </div>
 </div>
 <script src="src/corridor.js"></script>

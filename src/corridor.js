@@ -331,6 +331,7 @@ var
         type === 'checkbox' ? elem.checked :
         type === 'text' ? elem.value :
         type === 'textarea' ? elem.value :
+        type === 'select' ? elem.options[elem.selectedIndex].value :
         miss
       );
     
