@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>corridor — single page example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <style>
+    button { font-size: large; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>corridor example</h1>
+  <p>
+    Builds a package.json file.
+  </p>
+  <hr />
+  <div class="output">
+    <h2>package.json</h2>
+    <p>
+      The generated package.json file appears here.
+    </p>
+    <div>
+      <textarea></textarea>
+    </div>
+  </div>
+  <hr />
+  <div class="actions">
+    <h2>corridor actions</h2>
+    <p>
+      <button class="extract">&uArr; extract data &uArr;</button>
+      <button class="insert">&dArr; insert data &dArr;</button>
+    </p>
+  </div>
+  <hr />
+  <div class="input">
+    <h2>important fields</h2>
+    <p>
+      These fields are the most important to include.
+    </p>
+    <p>
+      <label>
+        name:
+        <input type="text" data-field='{"name":$$$}' data-opts='{"empty":"include"}'/>
+      </label>
+    </p>
+    <p>
+      <label>version: <input type="text" data-field='{"version":$$$}' /> </label>
+    </p>
+    <hr />
+    <h2>less-important fields</h2>
+    <p>
+      These fields could be omitted if you like.
+    </p>
+    <div data-opts='{"role":"toggleable"}'>
+      <p>
+        <label>
+          <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+          include keywords?
+        </label>
+      </p>
+      <p>
+        <label>
+          keywords (list format):
+          <textarea data-field='{"keywords":$$$}' data-opts='{"type":"list"}'></textarea>
+        </label>
+      </p>
+    </div>
+  </div>
+    <div data-opts='{"role":"toggleable"}'>
+      <p>
+        <label>
+          <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+          include bin?
+        </label>
+      </p>
+      <p>
+        <label>
+          bin (must be JSON):
+          <textarea data-field='{"bin":$$$}' data-opts='{"type":"json"}'>{ "npm" : "./cli.js" }</textarea>
+        </label>
+      </p>
+    </div>
+  </div>
+</div>
+<script src="src/corridor.js"></script>
+<script>
+(function(window, document, corridor, undefined){
+  
+var
+  
+  // relevant elements
+  input = document.querySelector('.input'),
+  output = document.querySelector('.output textarea');
+
+// extract button should send data to textarea
+document.querySelector('.extract').addEventListener('click', function(e) {
+  output.textContent = corridor(input);
+}, false);
+
+document.querySelector('.insert').addEventListener('click', function(e) {
+  corridor(input, JSON.parse(output.textContent));
+}, false);
+
+corridor.log = true;
+
+})(window, document, corridor);
+</script>
+<!--script src="http://code.jquery.com/jquery-git2.js"></script-->
+</body>
+</html>

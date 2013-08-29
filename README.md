@@ -1,4 +1,9 @@
-corridor
-========
+# corridor.js
 
-Dead simple JSON/DOM data corridor.
+JSON/DOM data corridor.
+
+See example.html for lots of examples.
+
+## License
+
+See LICENSE

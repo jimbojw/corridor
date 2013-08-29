@@ -1,0 +1,17 @@
+{
+  "name": "corridor",
+  "version": "0.1.0",
+  "description": "JSON/DOM data corridor.",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jimbojw/corridor.git"
+  },
+  "keywords": [
+    "json",
+    "dom",
+    "corridor"
+  ],
+  "author": "jimbojw",
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
