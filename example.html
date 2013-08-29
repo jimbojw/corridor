@@ -145,7 +145,7 @@ var
 
 // extract button should send data to textarea
 document.querySelector('.extract').addEventListener('click', function(e) {
-  output.textContent = JSON.stringify(corridor(input), null, '  ');
+  output.value = JSON.stringify(corridor(input), null, '  ');
 }, false);
 
 document.querySelector('.insert').addEventListener('click', function(e) {
