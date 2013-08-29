@@ -121,11 +121,20 @@ var
           return;
         } else if (opts.type === 'json') {
           value = JSON.stringify(value);
+        } else if (opts.type === 'list' && toString.call(value) === '[object Array]') {
+          value = (function(cat) {
+            return (
+              !(/[\s,]/).test(cat) ? value.join(' ') :
+              cat.indexOf(',') === -1 ? value.join(', ') :
+              value.join("\n")
+            );
+          })(value.join(''));
+          
         }
         val(elem, value);
         
       });
-        
+      
   },
   
   /**
@@ -136,10 +145,10 @@ var
     /**
      * If the field has a falsey value, this option determines whether it still contributes to the output.
      * Recognized choices are:
-     *  - omit - do not add the field at all (default)
-     *  - include - include the value in the output
+     *  - include - include the value in the output (default)
+     *  - omit - do not add the field at all
      */
-    empty: "omit",
+    empty: "include",
     
     /**
      * The role that this element plays in corridor operations.
