@@ -101,7 +101,7 @@ document.querySelector('.extract').addEventListener('click', function(e) {
 }, false);
 
 document.querySelector('.insert').addEventListener('click', function(e) {
-  corridor(input, JSON.parse(output.textContent));
+  corridor(input, JSON.parse(output.value));
 }, false);
 
 corridor.log = true;
