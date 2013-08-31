@@ -1,13 +1,21 @@
 /**
  * corridor.js
+ * 
+ * corridor is written to run in either a Node.js context or a browser context.
+ * The context and property objects are used to know how to export corridor.
+ *
+ * @param {mixed} context The context object (either module or window)
+ * @param {string} property The name of the key to assign on the context object (either 'exports' or 'corridor')
  */
-(function(window, document, undefined){
+(function(context, property, undefined){
 'use strict';
 
 var
   
   slice = Array.prototype.slice,
   toString = Object.prototype.toString,
+  
+  document = context.document || null,
   
   /**
    * Internal logging function.
@@ -28,7 +36,7 @@ var
    * @param {HTMLElement} elem The element to scan for data (defaults to document)
    * @param {mixed} data The data to insert (optional)
    */
-  corridor = window['corridor'] = function(elem, data) {
+  corridor = context[property] = function(elem, data) {
     elem = elem || document;
     return data ? insert(elem, data) : extract(elem);
   },
@@ -512,4 +520,6 @@ var
     return obj;
   };
 
-})(window, document);
+}).apply(null,
+  typeof module === 'object' ? [module, 'exports'] : [window, 'corridor']
+);
