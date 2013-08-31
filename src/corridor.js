@@ -306,7 +306,23 @@ var
    * @return {string} The full field string.
    */
   convertName = corridor.convertName = function(name) {
-    return '{' + JSON.stringify(name || 'undefined') + ':$$$}';
+    
+    var field = "\ufff0";                    // start out with the target mark
+    
+    name
+      .replace(/^\s+|\s+$/g, '')             // trim whitespace for courtesy
+      .replace(/\[\s+]/g, '[]')              // trim inside bracket vars
+      .replace(/\[([^\]]+)]/g, '.$1')        // convert bracket vars to dot vars
+      .match(/[^[\].]+|\[\]/g)               // grab list of component parts
+      .forEach(function(p) {
+        p = p.replace(/^\s+|\s+$/g, '');     // trim each part
+        field = field.replace("\ufff0",      // add part to field specification
+          p === '[]' ? "[\ufff0]" : "{" + JSON.stringify(p || 'undefined') + ":\ufff0}"
+        );
+      });
+    
+    return field.replace("\ufff0", '$$$$$$');
+    
   },
   
   /**
