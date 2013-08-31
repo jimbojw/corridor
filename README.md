@@ -1,6 +1,6 @@
 # corridor
 
-**`{json}` &rarr; `&lt;html&gt;` &rarr; `{json}`**
+**<span style="font-size:large">{json} &rarr; &lt;html&gt; &rarr; {json}</span>**
 
 Bi-directional data binding without the fuss.
 
