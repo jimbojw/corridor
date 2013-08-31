@@ -440,7 +440,30 @@ For example, the `enabledOnly` property controls whether corridor will operate o
 By default `enabledOnly` is set to `true`, meaning only enabled fields are included.
 You could set `enabledOnly` to `false` in the opts hash to tell corridor to ignore the effects of toggleables.
 
-### html API
+Options that apply to any field are:
+
+ * **type** — The kind of field this is. Choices are:
+  - _string_ - treate the value as a string (default)
+  - _boolean_ - coerce this value to something true/false
+  - _number_ - parse this value as a number
+  - _json_ - leave this value as-is (will choke if it's not actually valid JSON)
+  - _list_ - parse this value as a list of values
+ * **empty** — If a field has a falsey value, this option determines whether it still contributes to the output. Choices are:
+  - _include_ - include the value in the output (default)
+  - _omit_ - do not add the field at all
+
+Options specific to the `toggleable`/`toggle` functionality are:
+
+ * **role** — The role that this element plays in corridor operations. Choices are:
+  - _field_ - this element is a field whose value will contribute to extracted data (default)
+  - _toggleable_ - this element contains fields and may be toggled on or off
+  - _toggle_ - this element is a checkbox which toggles its nearest parent toggleable
+ * **enabledOnly** — (boolean) When inserting/extracting, only operate on enabled fields (default: true).
+
+Keep in mind that setting options via the `opts` param specifically affects the execution of the corridor function once.
+Persistent options should be stored in the HTML.
+
+### HTML API
 
 _TBD_
 
