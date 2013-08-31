@@ -4,13 +4,54 @@
 
 Bi-directional data binding without the fuss.
 
-## why corridor
+## why you need corridor
 
 Your data is in JSON, but your users interact with HTML.
-corridor's singular mission is to shuttle your data between your JSON and your HTML.
+corridor's only mission is to shuttle your data between your JSON and your HTML.
 
-It is a runtime library, not a templating language.
-corridor runs in the browser, able to transfer your data both ways: from form fields to JSON and back again.
+In a nutshell, corridor gives you the power to turn this:
+
+```html
+<fieldset name="project">
+  <input type="text" name="dependencies.foo" value="~0.1.0" />
+  <input type="text" name="dependencies.bar" value="~2.1.0" />
+</fieldset>
+```
+
+Into this:
+
+```js
+{
+  "project": {
+    "dependencies": {
+      "foo": "~0.1.0",
+      "bar": "~2.1.0"
+    }
+  }
+}
+```
+
+And vice versa.
+
+### how corridor works
+
+corridor is a runtime library, not a templating language.
+It runs in the browser, easily transferring your data both ways: from form fields to JSON and (importantly) back again.
+
+corridor uses the `name` attributes of your HTML elements to determine how a given input contributes to a JSON representation.
+In most cases it'll just work, but if you need more flexibility, corridor's API options offer many points of customization.
+
+Read the tutorial to get started, or skip to the API section for the details.
+
+### corridor's philosophy
+
+The corridor project philosophy boils down to these points:
+
+ * **unobtrusive** — corridor presents just one function, has no dependencies, and causes no side-effects.
+ * **intelligent** — corridor learns what to do by looking at the data, not by being told (except where you want to).
+ * **clear** — corridor's code, functionality, tests, milestones and issues are all well documented and easy to follow.
+
+Development of features, bugfixes and documentation are held to these ideals.
 
 ## getting corridor
 
