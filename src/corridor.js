@@ -268,7 +268,7 @@ var
       if (elem.hasAttribute('data-field')) {
         field = elem.getAttribute('data-field') || undefined;
       } else if (bottom === elem && elem.hasAttribute('name')) {
-        field = '{' + JSON.stringify(elem.getAttribute('name') || 'undefined') + ':$$$}';
+        field = convertName(elem.getAttribute('name'));
       }
       
       if (field || elem.hasAttribute('data-opts')) {
@@ -285,6 +285,17 @@ var
     
     return true;
     
+  },
+  
+  /**
+   * Convert a simple name attribute string into a full field string.
+   * For example:
+   *  - 'foo' becomes '{"foo":$$$}'
+   * @param {string} name The name string to convert.
+   * @return {string} The full field string.
+   */
+  convertName = corridor.convertName = function(name) {
+    return '{' + JSON.stringify(name || 'undefined') + ':$$$}';
   },
   
   /**
