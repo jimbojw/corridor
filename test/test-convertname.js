@@ -23,6 +23,14 @@ exports.testConvertName = function(test) {
       field: '[$$$]',
       reason: 'empty square brackets alone should contribute to an array'
     },{
+      name: '[ ]',
+      field: '[$$$]',
+      reason: 'whitespace in square brackets alone should be treated as empty'
+    },{
+      name: '[].name',
+      field: '[{"name":$$$}]',
+      reason: 'empty square brackets alone should contribute to an array'
+    },{
       name: 'list[]',
       field: '{"list":[$$$]}',
       reason: 'empty square brackets after a key adds to that key\'s array'
@@ -30,6 +38,10 @@ exports.testConvertName = function(test) {
       name: 'foo[bar]',
       field: '{"foo":{"bar":$$$}}',
       reason: 'non-empty square brackets act just like a dot delimited key'
+    },{
+      name: ' foo [ bar ] ',
+      field: '{"foo":{"bar":$$$}}',
+      reason: 'whitespace virtually anywhere should not not change the output'
     },{
       name: 'foo[bar].baz[]',
       field: '{"foo":{"bar":{"baz":[$$$]}}}',
