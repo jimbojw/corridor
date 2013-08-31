@@ -36,6 +36,9 @@ var
    * @param {HTMLElement} root The element to scan for data (defaults to document)
    * @param {mixed} data The data to insert (optional)
    * @param {object} opts Hash of options (optional)
+   * Relevant options are:
+   *  - enabledOnly - Whether to only include enabled elements
+   *  - namedFields - Whether to include fields with a 'name' attribute
    */
   corridor = context[property] = function(root, data, opts) {
     root = root || document;
@@ -45,7 +48,7 @@ var
   /**
    * Extract data from DOM values under the specified element.
    * @param {HTMLElement} root The root element to scan for data.
-   * @param {object} opts Hash of options (optional)
+   * @param {object} opts Hash of options (optional, see corridor options)
    */
   extract = corridor.extract = function(root, opts) {
     
@@ -94,6 +97,7 @@ var
    * Insert data into the DOM under the specified element from provided data.
    * @param {HTMLElement} root The element to scan for insertion fields (optional).
    * @param {mixed} data The data to insert.
+   * @param {object} opts Hash of options (optional, see corridor options)
    */
   insert = corridor.insert = function(root, data, opts) {
     
@@ -224,7 +228,7 @@ var
    * @param {HTMLElement} root The root element to search for fields.
    * @param {object} opts Options hash to affect selection behavior (optional).
    * Relevant options are:
-   *  - 
+   *  - namedFields - Whether to include elements with a 'name' attribute
    */
   selectFields = corridor.selectFields = function(root, opts) {
     
@@ -255,19 +259,32 @@ var
    * @return {boolean} False if the callback ever returned false, otherwise true.
    */
   upwalk = corridor.upwalk = function(elem, root, callback) {
-    var field, opts, res;
+    
+    var field, opts, res, bottom = elem;
+    
     while (elem !== null && elem.getAttribute) {
-      if (elem.hasAttribute('data-field') || elem.hasAttribute('data-opts')) {
+      
+      field = undefined;
+      if (elem.hasAttribute('data-field')) {
         field = elem.getAttribute('data-field') || undefined;
+      } else if (bottom === elem && elem.hasAttribute('name')) {
+        field = '{' + JSON.stringify(elem.getAttribute('name') || 'undefined') + ':$$$}';
+      }
+      
+      if (field || elem.hasAttribute('data-opts')) {
         opts = options(elem, defaults);
         res = callback(elem, field, opts);
         if (res === false) {
           return false;
         }
       }
+      
       elem = (elem === root) ? null : elem.parentNode;
+      
     }
+    
     return true;
+    
   },
   
   /**
