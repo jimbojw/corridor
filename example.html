@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <style>
     button { font-size: large; }
+    textarea { width: 100%; }
   </style>
 </head>
 <body>
@@ -24,7 +25,7 @@
       The generated package.json file appears here.
     </p>
     <div>
-      <textarea></textarea>
+      <textarea rows="8"></textarea>
     </div>
   </div>
   <hr />
@@ -58,8 +59,8 @@
     <div>
       <p>
         <label>
-          homepage:
-          <input name="homepage" data-opts='{"empty":"omit"}' value="https://npmjs.org/package/corridor" />
+          homepage (will be omitted if empty):
+          <input type="text" name="homepage" data-opts='{"empty":"omit"}' value="https://npmjs.org/package/corridor" />
         </label>
       </p>
     </div>
@@ -73,15 +74,15 @@
       <p data-field='{"authors":$$$}'>
         <label>
           first author:
-          <input data-field='[$$$]' data-opts='{"empty":"omit"}' value="jimbojw" />
+          <input type="text" data-field='[$$$]' data-opts='{"empty":"omit"}' value="jimbojw" />
         </label>
         <label>
           second author:
-          <input data-field='[$$$]' data-opts='{"empty":"omit"}' />
+          <input type="text" data-field='[$$$]' data-opts='{"empty":"omit"}' />
         </label>
         <label>
           third author:
-          <input data-field='[$$$]' data-opts='{"empty":"omit"}' />
+          <input type="text" data-field='[$$$]' data-opts='{"empty":"omit"}' />
         </label>
       </p>
     </div>
