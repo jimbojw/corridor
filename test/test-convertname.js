@@ -62,6 +62,14 @@ exports.testConvertName = function(test) {
       name: 'foo[bar].baz[]',
       field: '{"foo":{"bar":{"baz":[$$$]}}}',
       reason: 'mixing bracket and dot key styles is fine'
+    },{
+      name: '{"authors":$$$}',
+      field: '{"authors":$$$}',
+      reason: 'presence of $$$ anywhere should indicate field format'
+    },{
+      name: '[$$$]',
+      field: '[$$$]',
+      reason: 'presence of $$$ anywhere should indicate field format'
     }
   ];
   
