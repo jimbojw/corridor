@@ -38,8 +38,6 @@ This function does one of two things:
  * extract data out of a DOM heirarchy (form elements), or
  * insert data into the DOM.
 
-It knows how to shuttle data back and forth by looking at HTML5 data attributes on the DOM elements.
-
 Let's take a look at how this works by using the practical example of a [`package.json`](https://npmjs.org/doc/json.html) file.
 We'll build out a single-page web app for manipulating a package.json file.
 
@@ -47,7 +45,7 @@ To skip to the outcome of this walkthrough, see the `example.html` file.
 
 ### package.json example app
 
-For a `package.json`, you need at least the following data:
+For a `package.json` file, you need at least the following data:
 
  * name - the name of the project.
  * version - the semantic version number of the project.
@@ -72,20 +70,15 @@ Now let's put together the UI for working with this data.
 
 ### corridor fields
 
-corridor makes it easy to write a UI that controls this data structure.
 Let's start with the `name` field.
 Here's the HTML you'd need:
 
 ```html
-<input type="text" data-field='{"name":$$$}' />
+<input type="text" name="name" />
 ```
 
-The `data-field` attribute tells corridor that this `input` provides the value for the `name` property.
-The `$$$` token is necessary here, it tells corridor how to insert the value.
-Other than the `$$$` token, the `data-field` should contain proper JSON.
-
 Let's try it out.
-Make sure you have the `<input>` HTML on a page and the corridor library included.
+Make sure you have the `<input>` HTML on a page and the `corridor.js` library included.
 Then you can call the corridor function with no arguments to extract all the data on the page.
 
 ```js
@@ -100,17 +93,17 @@ If you don't provide one, corridor will assume you meant to search down from the
 By default, corridor will assume that the value provided by a field is a string.
 However, you can override this by specifiying a type.
 
-All options to corridor are done by adding a `data-opts` attribute to the node.
+To give options to corridor for a particular HTML element, give it a `data-opts` attribute.
 Let's see how this applies to the `keywords` field of a package.json.
 
-The corridor HTML for the keywords field looks like this:
+The HTML for the keywords field should look like this:
 
 ```html
-<textarea data-field='{"keywords":$$$}' data-opts='{"type":"list"}'></textarea>
+<textarea name="keywords" data-opts='{"type":"list"}'></textarea>
 ```
 
 Here the `type` property indicates that we have a `list` value.
-corridor will try to parse the text value of the `<textarea>` as a list of items, and will output an array.
+corridor will try to parse the text in the `<textarea>` as a list of items, and will output an array.
 
 Let's give it a try!
 With the above `<textarea>` on a page, enter the text `"abc, def"` (no quotes).
@@ -144,25 +137,23 @@ For example, say we wanted to have drop-down choices for the `foo` and `bar` dep
 The corridor HTML for that would look something like this:
 
 ```html
-<p data-field='{"dependencies":$$$}'>
+<fieldset>
   <label>
     foo:
-    <select data-field='{"foo":$$$}'>
+    <select name="dependencies.foo">
       <option value="~1.1.0">foo: version 1</option>
       <option value="~2.0.0">foo: version 2</option>
     </select>
   </label>
   <label>
     bar:
-    <select data-field='{"bar":$$$}'>
+    <select name="dependencies.bar">
       <option value="~3.5.0">bar: version 3</option>
       <option value="~4.1.0">bar: version 4</option>
     </select>
   </label>
 </p>
 ```
-
-The paragraph element's `data-field` attribute tells corridor that any fields under it should roll up under it when creating the data object.
 
 Running `corridor()` on this gives us:
 
@@ -175,18 +166,120 @@ Running `corridor()` on this gives us:
 }
 ```
 
+But it doesn't end there!
+Since both the `foo` and `bar` select boxes live under `dependencies`, giving a `name` to the fieldset would have the same effect:
+
+```html
+<fieldset name="dependencies">
+  <label>
+    foo:
+    <select name="foo">
+      <option value="~1.1.0">foo: version 1</option>
+      <option value="~2.0.0">foo: version 2</option>
+    </select>
+  </label>
+  <label>
+    bar:
+    <select name="bar">
+      <option value="~3.5.0">bar: version 3</option>
+      <option value="~4.1.0">bar: version 4</option>
+    </select>
+  </label>
+</p>
+```
+
+If you run corridor in this, you'll get the same JSON listed above.
+
 Merging works best for objects like the `dependencies` object we just looked at.
 But corridor can also merge arrays.
+
+### rich path names
+
+In the last section we saw a rudimentary example of how to create nested data structures.
+The range of supported names is quite rich.
+
+These are best explained by example.
+Let's say you wanted to add `authors` to your package.json form, with a separate input for each author.
+
+The HTML for that might look like this:
+
+```html
+<fieldset>
+  <label>
+    first author:
+    <input type="text" name="authors[]" value="your name" />
+  </label>
+  <label>
+    second author:
+    <input type="text" name="authors[]" data-opts='{"empty":"omit"}' />
+  </label>
+  <label>
+    third author:
+    <input type="text" name="authors[]" data-opts='{"empty":"omit"}' />
+  </label>
+</fieldset>
+```
+
+The name attribute for each author input is `authors[]`.
+The trailing square brackets means that the input value should contribute to an array.
+
+Running corridor on the above would give you JSON like this:
+
+```js
+{
+  authors: [
+    "your name"
+  ]
+}
+```
+
+Notice that there's only one element in this array.
+That's due to the `empty:omit` option on each of the other inputs.
+By default, corridor will include empty values in the output JSON it produces, but you can disable this feature by setting `empty` to `omit`.
+
+Just like with the `dependencies.foo` case from last section, here we could split up the parts of the name between the fieldset and the inputs.
+E.g.
+
+```html
+<fieldset name="authors">
+  <label>
+    first author:
+    <input type="text" name="[]" value="your name" />
+```
+
+You can mix and match dot delimited paths and square brackets to create even richer structures.
+
+```html
+<input type="text" name="stock.ticker[]symbols" value="BCOV AMZN" data-opts='{"type":"list"}' />
+```
+
+Produces this:
+
+```js
+"stock": {
+  "ticker": [
+    {
+      "symbols": [
+        "BCOV",
+        "AMZN"
+      ]
+    }
+  ]
+}
+```
+
+Whitespace around key names is stripped, but whitespace inside them is preserved.
+For example `name=" foo bar "` would produce an object with a `foo bar` property.
 
 ### toggling sections
 
 You can mark sections of your UI as being toggleable using the `role` option in an element's `data-opts`.
 
 For example, say you wanted a checkbox to control whether `keywords` were going to be included in the output.
-The corridor HTML for that might look like this:
+The HTML for that might look like this:
 
 ```html
-<div data-opts='{"role":"toggleable"}'>
+<fieldset data-opts='{"role":"toggleable"}'>
   <p>
     <label>
       <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
@@ -196,22 +289,21 @@ The corridor HTML for that might look like this:
   <p>
     <label>
       keywords (list format):
-      <textarea data-field='{"keywords":$$$}' data-opts='{"type":"list"}'></textarea>
+      <textarea name="keywords" data-opts='{"type":"list"}'></textarea>
     </label>
   </p>
-</div>
+</fieldset>
 ```
 
-Adding the `toggleable` role to the outer `<div>` signals to corridor that this section can be turned on and off.
+Adding the `toggleable` role to the `<frameset>` signals to corridor that this section can be turned on and off.
 The checkbox with the role `toggle` controls it.
 
 You can nest toggleable sections inside each other.
-In each case, the toggle that control the toggleable container is the nearest child.
+In each case, the toggle that controls the toggleable container is the nearest child.
 
 ### inserting data
 
-Just as corridor can pull data out of the DOM, it can put the data back in as well.
-This feature is still a bit experimental, there are some bugs around reinserting arrays (we're working on it).
+This tutorial has focused largely on explaining how data flows from HTML to JSON, but corridor is great at sending data the other way as well.
 
 To insert data back into the DOM, call the corridor function with a root element and a data structure object.
 
@@ -222,7 +314,7 @@ corridor(document.body, {
 });
 ```
 
-corridor uses the same `data-field` and `data-opts` parameters to determine where data values should be inserted.
+corridor uses the same `name` and `data-opts` attributes to determine where data values should be inserted.
 
 ## issues and feature requests
 

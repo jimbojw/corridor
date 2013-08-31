@@ -36,6 +36,9 @@ var
    * @param {HTMLElement} root The element to scan for data (defaults to document)
    * @param {mixed} data The data to insert (optional)
    * @param {object} opts Hash of options (optional)
+   * Relevant options are:
+   *  - enabledOnly - Whether to only include enabled elements
+   *  - namedFields - Whether to include fields with a 'name' attribute
    */
   corridor = context[property] = function(root, data, opts) {
     root = root || document;
@@ -45,7 +48,7 @@ var
   /**
    * Extract data from DOM values under the specified element.
    * @param {HTMLElement} root The root element to scan for data.
-   * @param {object} opts Hash of options (optional)
+   * @param {object} opts Hash of options (optional, see corridor options)
    */
   extract = corridor.extract = function(root, opts) {
     
@@ -59,7 +62,7 @@ var
     var
       settings = extend({}, defaults, opts),
       data = {},
-      fields = slice.call(root.querySelectorAll('[data-field]')).filter(hasVal);
+      fields = selectFields(root, settings).filter(hasVal);
       
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
@@ -94,6 +97,7 @@ var
    * Insert data into the DOM under the specified element from provided data.
    * @param {HTMLElement} root The element to scan for insertion fields (optional).
    * @param {mixed} data The data to insert.
+   * @param {object} opts Hash of options (optional, see corridor options)
    */
   insert = corridor.insert = function(root, data, opts) {
     
@@ -113,7 +117,7 @@ var
       // used to figure out true contribution paths for inserting data into elements
       workspace = {},
       
-      fields = slice.call(root.querySelectorAll('[data-field]')).filter(hasVal);
+      fields = selectFields(root, settings).filter(hasVal);
     
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
@@ -208,9 +212,31 @@ var
     type: "string",
     
     /**
-     * Only operate on enabled fields when this is true (the default).
+     * When inserting/extracting, only operate on enabled fields (default: true).
      */
-    enabledOnly: true
+    enabledOnly: true,
+    
+    /**
+     * When selecting fields, include any elements with a 'name' attribute (default: true).
+     */
+    namedFields: true
+    
+  },
+  
+  /**
+   * Select an array of field elements from the specified root element.
+   * @param {HTMLElement} root The root element to search for fields.
+   * @param {object} opts Options hash to affect selection behavior (optional).
+   * Relevant options are:
+   *  - namedFields - Whether to include elements with a 'name' attribute
+   */
+  selectFields = corridor.selectFields = function(root, opts) {
+    
+    var
+      settings = extend({}, defaults, opts),
+      selector = '[data-field]' + (settings.namedFields ? ', [name]' : '');
+    
+    return slice.call(root.querySelectorAll(selector));
     
   },
   
@@ -233,19 +259,70 @@ var
    * @return {boolean} False if the callback ever returned false, otherwise true.
    */
   upwalk = corridor.upwalk = function(elem, root, callback) {
+    
     var field, opts, res;
+    
     while (elem !== null && elem.getAttribute) {
-      if (elem.hasAttribute('data-field') || elem.hasAttribute('data-opts')) {
+      
+      field = undefined;
+      if (elem.hasAttribute('data-field')) {
         field = elem.getAttribute('data-field') || undefined;
+      } else if (elem.hasAttribute('name')) {
+        field = convertName(elem.getAttribute('name'));
+      }
+      
+      if (field || elem.hasAttribute('data-opts')) {
         opts = options(elem, defaults);
         res = callback(elem, field, opts);
         if (res === false) {
           return false;
         }
       }
+      
       elem = (elem === root) ? null : elem.parentNode;
+      
     }
+    
     return true;
+    
+  },
+  
+  /**
+   * Convert a simple name attribute string into a full field string.
+   * The simple name format is a hybrid of Apple's Key-Value Coding and PHP's array-based form variables.
+   *
+   * Examples:
+   *  - 'foo' --> '{"foo":$$$}'
+   *  - 'foo.bar' --> '{"foo":{"bar":$$$}}'
+   *  - '[]' --> '[$$$]'
+   *  - 'list[]' --> 'list[$$$]'
+   *  - 'foo[bar]' --> '{"foo":{"bar":$$$}}'
+   *  - 'foo[bar][]' --> '{"foo":{"bar":[$$$]}}'
+   *
+   * @see https://developer.apple.com/library/ios/DOCUMENTATION/Cocoa/Conceptual/KeyValueCoding/Articles/BasicPrinciples.html
+   * @see http://php.net/manual/en/faq.html.php#faq.html.arrays
+   *
+   * @param {string} name The name string to convert.
+   * @return {string} The full field string.
+   */
+  convertName = corridor.convertName = function(name) {
+    
+    var field = "\ufff0";                    // start out with the target mark
+    
+    name
+      .replace(/^\s+|\s+$/g, '')             // trim whitespace for courtesy
+      .replace(/\[\s+]/g, '[]')              // trim inside bracket vars
+      .replace(/\[([^\]]+)]/g, '.$1')        // convert bracket vars to dot vars
+      .match(/[^[\].]+|\[\]/g)               // grab list of component parts
+      .forEach(function(p) {
+        p = p.replace(/^\s+|\s+$/g, '');     // trim each part
+        field = field.replace("\ufff0",      // add part to field specification
+          p === '[]' ? "[\ufff0]" : "{" + JSON.stringify(p || 'undefined') + ":\ufff0}"
+        );
+      });
+    
+    return field.replace("\ufff0", '$$$$$$');
+    
   },
   
   /**
@@ -383,7 +460,7 @@ var
    * @return {string} a parsable list string.
    */
   listify = corridor.listify = function(arry) {
-    if (toString.call(arry) !== '[abject Array]') {
+    if (toString.call(arry) !== '[object Array]') {
       return arry;
     }
     var cat = arry.join('')
@@ -424,10 +501,12 @@ var
         });
     
     if (!candidates.length) {
+      log('No child "toggle" element found for toggelable.', elem);
       throw Error('No child "toggle" element found for toggelable.');
     }
     
     if (candidates.length > 1) {
+      log('Multiple "toggle" elements have been found for toggleable.', elem);
       throw Error('Multiple "toggle" elements have been found for toggleable.');
     }
     
