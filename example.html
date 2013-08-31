@@ -58,6 +58,14 @@
     <div data-opts='{"role":"toggleable"}'>
       <p>
         <label>
+          homepage:
+          <input name="homepage" data-opts='{"empty":"omit"}' value="https://npmjs.org/package/corridor" />
+        </label>
+      </p>
+    </div>
+    <div data-opts='{"role":"toggleable"}'>
+      <p>
+        <label>
           <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
           include authors?
         </label>
@@ -87,7 +95,7 @@
       <p>
         <label>
           keywords (list format):
-          <textarea data-field='{"keywords":$$$}' data-opts='{"type":"list"}'></textarea>
+          <textarea data-field='{"keywords":$$$}' data-opts='{"type":"list"}'>foo bar</textarea>
         </label>
       </p>
     </div>
