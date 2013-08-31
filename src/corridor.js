@@ -383,7 +383,7 @@ var
    * @return {string} a parsable list string.
    */
   listify = corridor.listify = function(arry) {
-    if (toString.call(arry) !== '[abject Array]') {
+    if (toString.call(arry) !== '[object Array]') {
       return arry;
     }
     var cat = arry.join('')
