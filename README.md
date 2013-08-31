@@ -465,6 +465,25 @@ Persistent options should be stored in the HTML.
 
 ### HTML API
 
+corridor inspects the Document Object Model (DOM) at runtime to figure out how to extract and insert data.
+Specificially, it looks at these things:
+
+ * the tag name,
+ * the `name` (or `data-name`) attribute, and
+ * the `data-opts` attribute.
+
+The tag name influences whether corridor considers an element to have a value, and if so, how to retrieve it.
+For instance, the way you extract a value from a `<textarea>` differs from how you extract a value from a `<select>` element.
+
+The `name` attribute is by far the most important one to corridor.
+The presence of a `name` attribute (or `data-name`) tells corridor that an element should be considered for data insertion/extraction.
+The content of this attribute tells corridor exactly how to shuttle data between the element's value and the data representation.
+
+The `data-opts` attribute, when present, contains JSON that overrides the default options (see the _opts_ section above).
+`data-opts` is also used to denote elements that are `toggleable` or perform the role of a `toggle` control for a toggleable section.
+
+#### name attribute
+
 _TBD_
 
 ## issues and feature requests
