@@ -81,10 +81,22 @@ var
   
   /**
    * Insert data into the DOM under the specified element from provided data.
-   * @param {HTMLElement} root The element to scan for insertion fields.
+   * @param {HTMLElement} root The element to scan for insertion fields (optional).
    * @param {mixed} data The data to insert.
    */
   insert = corridor.insert = function(root, data) {
+    
+    // allow root to be optional
+    if (data === undefined) {
+      data = root;
+      root = null;
+    }
+    root = root || document;
+    
+    // fail fast if there's no root element to use
+    if (!root) {
+      throw Error('corridor requires a queryable root element to insert data into');
+    }
     
     // data structure for existing fields
     // used to figure out true contribution paths for inserting data into elements
