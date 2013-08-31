@@ -32,48 +32,59 @@ var
   },
   
   /**
-   * Extract data from DOM or insert values back into it.
-   * @param {HTMLElement} elem The element to scan for data (defaults to document)
+   * Extract data from the DOM or insert values back into it.
+   * @param {HTMLElement} root The element to scan for data (defaults to document)
    * @param {mixed} data The data to insert (optional)
+   * @param {object} opts Hash of options (optional)
    */
-  corridor = context[property] = function(elem, data) {
-    elem = elem || document;
-    return data ? insert(elem, data) : extract(elem);
+  corridor = context[property] = function(root, data, opts) {
+    root = root || document;
+    return data ? insert(root, data, opts) : extract(root, opts);
   },
   
   /**
    * Extract data from DOM values under the specified element.
    * @param {HTMLElement} root The root element to scan for data.
+   * @param {object} opts Hash of options (optional)
    */
-  extract = corridor.extract = function(root) {
+  extract = corridor.extract = function(root, opts) {
     
     root = root || document;
     
-    var data = {};
+    // fail fast if there's no root element to use
+    if (!root) {
+      throw Error('corridor requires a queryable root element to insert data into');
+    }
+    
+    var
+      settings = extend({}, defaults, opts),
+      data = {},
+      fields = slice.call(root.querySelectorAll('[data-field]')).filter(hasVal);
       
-    slice.call(root.querySelectorAll('[data-field]'))
-      .filter(hasVal)
-      .filter(enabled)
-      .forEach(function(elem) { 
+    if (settings.enabledOnly) {
+      fields = fields.filter(enabled);
+    }
       
-        var
-          opts = options(elem, defaults),
-          value = val(elem);
-        
-        if (opts.empty === 'omit' && !value) {
-          return;
-        }
-        
-        // create type-specific value string
-        value = JSON.stringify(coerce(value, opts.type, opts));
-        
-        // build out full contribution
-        value = buildup(value, elem, root);
-        
-        // merge contribution into the result data
-        merge(data, JSON.parse(value));
-        
-      });
+    fields.forEach(function(elem) { 
+    
+      var
+        opts = options(elem, settings),
+        value = val(elem);
+      
+      if (opts.empty === 'omit' && !value) {
+        return;
+      }
+      
+      // create type-specific value string
+      value = JSON.stringify(coerce(value, opts.type, opts));
+      
+      // build out full contribution
+      value = buildup(value, elem, root);
+      
+      // merge contribution into the result data
+      merge(data, JSON.parse(value));
+      
+    });
     
     return data;
     
@@ -84,13 +95,9 @@ var
    * @param {HTMLElement} root The element to scan for insertion fields (optional).
    * @param {mixed} data The data to insert.
    */
-  insert = corridor.insert = function(root, data) {
+  insert = corridor.insert = function(root, data, opts) {
     
     // allow root to be optional
-    if (data === undefined) {
-      data = root;
-      root = null;
-    }
     root = root || document;
     
     // fail fast if there's no root element to use
@@ -98,14 +105,22 @@ var
       throw Error('corridor requires a queryable root element to insert data into');
     }
     
-    // data structure for existing fields
-    // used to figure out true contribution paths for inserting data into elements
-    var workspace = {};
+    var
+      
+      settings = extend({}, defaults, opts),
+      
+      // data structure for existing fields
+      // used to figure out true contribution paths for inserting data into elements
+      workspace = {},
+      
+      fields = slice.call(root.querySelectorAll('[data-field]')).filter(hasVal);
+    
+    if (settings.enabledOnly) {
+      fields = fields.filter(enabled);
+    }
     
     // for each value'd, enabled data-field
-    slice.call(root.querySelectorAll('[data-field]'))
-      .filter(hasVal)
-      .filter(enabled)
+    fields
       .map(function(elem) {
         
         var target, path;
@@ -123,7 +138,7 @@ var
         // set actual val into workspace to prevent false hits for future fields
         (function(pathCopy){
           var
-            opts = options(elem, defaults),
+            opts = options(elem, settings),
             node = workspace;
           while (pathCopy.length > 1) {
             node = node[pathCopy.shift()];
@@ -160,7 +175,7 @@ var
   },
   
   /**
-   * Default values applied to data-opts.
+   * Default values applied to options.
    */
   defaults = corridor.defaults = {
     
@@ -190,7 +205,12 @@ var
      *  - json - leave this value as-is (will choke if it's not actually valid JSON)
      *  - list - parse this value as a list of values
      */
-    type: "string"
+    type: "string",
+    
+    /**
+     * Only operate on enabled fields when this is true (the default).
+     */
+    enabledOnly: true
     
   },
   
