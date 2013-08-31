@@ -1,11 +1,21 @@
 # corridor
 
-JSON/DOM data corridor.
-Data binding without the fuss.
+**`{json}` &rarr; `&lt;html&gt;` &rarr; `{json}`**
+
+Bi-directional data binding without the fuss.
+
+## why corridor
+
+Your data is in JSON, but your users interact with HTML.
+corridor's singular mission is to shuttle your data between your JSON and your HTML.
+
+It is a runtime library, not a templating language.
+corridor runs in the browser, able to transfer your data both ways: from form fields to JSON and back again.
 
 ## getting corridor
 
-corridor is just a single js file.
+corridor is a single js file with no dependencies.
+You can get it in either of two ways:
 
 * from github: grab [corridor.js](https://github.com/jimbojw/corridor/blob/master/src/corridor.js) out of the [corridor repo](https://github.com/jimbojw/corridor)
 * from npm: 
@@ -14,13 +24,19 @@ corridor is just a single js file.
 $ npm install corridor
 ```
 
-## using corridor
+## corridor tutorial
+
+It would be great if users could just edit JSON directly.
+That way, your REST API would be all you'd need.
+
+But unfortunately, your users interact with the Document Object Model (DOM) representation of your HTML.
+Which means that it's your job to figure out how to get these two views of the data to match.
 
 The corridor library has only one function called `corridor()`.
 This function does one of two things:
 
- * extract data out of a DOM heirarchy, or
- * insert data into a DOM heirarchy.
+ * extract data out of a DOM heirarchy (form elements), or
+ * insert data into the DOM.
 
 It knows how to shuttle data back and forth by looking at HTML5 data attributes on the DOM elements.
 
@@ -207,6 +223,47 @@ corridor(document.body, {
 ```
 
 corridor uses the same `data-field` and `data-opts` parameters to determine where data values should be inserted.
+
+## issues and feature requests
+
+If you find any issues with corridor, or if you'd like to request a feature, please head over to the [issues page on github](https://github.com/jimbojw/corridor/issues).
+
+Keep in mind that the more specific you are, the more likely your issue or feature is to be addressed.
+
+## questions
+
+If you have a question about how to use corridor, or if you're not sure if you're doing it right, go to [stackoverflow](http://stackoverflow.com/) and [ask a question](http://stackoverflow.com/questions/ask?tags=corridor).
+Make sure you add the `corridor` tag to your question.
+
+## developing corridor
+
+If you're interested in developing corridor, great!
+Start by forking [corridor on github](https://github.com/jimbojw/corridor).
+
+Once you've forked the project, clone it using `git clone`:
+
+```sh
+$ git clone git@github.com:<YOUR_USERNAME>/corridor.git
+```
+
+corridor uses npm for packaging and deployment, so you'll need to install Node.js if you haven't already.
+Once you have node, you can pull in corridor's development dependencies:
+
+```sh
+$ npm install
+```
+
+After installing the dependencies, you can run the unit tests:
+
+```sh
+$ npm test
+```
+
+The source code for corridor is in the `src/` directory, and unit tests are under `test/`.
+corridor's unit tests are written for [nodeunit](https://npmjs.org/package/nodeunit).
+
+When you're satisfied with your changes, commit them and push them to your forked repository.
+Then open a pull request in github by hitting the big "Pull Request" button from the main project repo page.
 
 ## License
 
