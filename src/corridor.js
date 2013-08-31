@@ -59,7 +59,7 @@ var
     var
       settings = extend({}, defaults, opts),
       data = {},
-      fields = slice.call(root.querySelectorAll('[data-field]')).filter(hasVal);
+      fields = selectFields(root, settings).filter(hasVal);
       
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
@@ -113,7 +113,7 @@ var
       // used to figure out true contribution paths for inserting data into elements
       workspace = {},
       
-      fields = slice.call(root.querySelectorAll('[data-field]')).filter(hasVal);
+      fields = selectFields(root, settings).filter(hasVal);
     
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
@@ -211,6 +211,21 @@ var
      * Only operate on enabled fields when this is true (the default).
      */
     enabledOnly: true
+    
+  },
+  
+  /**
+   * Select an array of field elements from the specified root element.
+   * @param {HTMLElement} root The root element to search for fields.
+   * @param {object} opts Options hash to affect selection behavior (optional).
+   * Relevant options are:
+   *  - 
+   */
+  selectFields = corridor.selectFields = function(root, opts) {
+    
+    var settings = extend({}, defaults, opts);
+    
+    return slice.call(root.querySelectorAll('[data-field]'));
     
   },
   
