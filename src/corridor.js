@@ -289,8 +289,19 @@ var
   
   /**
    * Convert a simple name attribute string into a full field string.
-   * For example:
-   *  - 'foo' becomes '{"foo":$$$}'
+   * The simple name format is a hybrid of Apple's Key-Value Coding and PHP's array-based form variables.
+   *
+   * Examples:
+   *  - 'foo' --> '{"foo":$$$}'
+   *  - 'foo.bar' --> '{"foo":{"bar":$$$}}'
+   *  - '[]' --> '[$$$]'
+   *  - 'list[]' --> 'list[$$$]'
+   *  - 'foo[bar]' --> '{"foo":{"bar":$$$}}'
+   *  - 'foo[bar][]' --> '{"foo":{"bar":[$$$]}}'
+   *
+   * @see https://developer.apple.com/library/ios/DOCUMENTATION/Cocoa/Conceptual/KeyValueCoding/Articles/BasicPrinciples.html
+   * @see http://php.net/manual/en/faq.html.php#faq.html.arrays
+   *
    * @param {string} name The name string to convert.
    * @return {string} The full field string.
    */
