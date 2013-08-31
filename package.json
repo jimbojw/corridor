@@ -14,5 +14,11 @@
   ],
   "author": "jimbojw",
   "license": "MIT",
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "scripts": {
+    "test": "./node_modules/nodeunit/bin/nodeunit ./test"
+  },
+  "devDependencies": {
+    "nodeunit": "~0.8.1"
+  }
 }
