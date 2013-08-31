@@ -357,6 +357,93 @@ corridor(document.body, {
 
 corridor uses the same `name` and `data-opts` attributes to determine where data values should be inserted.
 
+## corridor API
+
+The corridor API consists of two major parts: the `corridor()` function itself, and the information in the HTML it uses to make decisions about how to operate.
+
+### corridor() function
+
+The corridor function takes three parameters, all optional:
+
+```
+corridor([root], [data], [opts])
+```
+
+The parameters are:
+
+ * `root` — The starting DOM element to search for named fields (defaults to `document`).
+ * `data` — The plain JSON data object whose values are to be inserted.
+ * `opts` — Additional options to inform how corridor makes decisions.
+
+The presence of the second parameter, `data`, tells corridor whether it should extract data from the DOM or insert data into it.
+
+#### extracting data
+
+To extract data from the DOM, call `corridor()` without the second argument, or set it to null.
+
+Examples:
+
+```js
+corridor();
+corridor(root);
+corridor(root, null, opts);
+corridor(null, null, opts);
+```
+
+In _extract mode_, corridor will:
+
+ * start at the `root` element,
+ * find all named fields,
+ * extract their values, and
+ * return the plain JSON data object that results.
+
+This is completely safe.
+No side-effects are produced as a result of this operation, just data extraction.
+
+#### inserting data
+
+To insert data into the DOM, call `corridor()` with an object as the second argument.
+
+Examples:
+
+```js
+corridor(null, data);
+corridor(root, data);
+corridor(null, data, options);
+corridor(root, data, options);
+```
+
+In _insert mode_, corridor will:
+
+ * start at the `root` element,
+ * find all named fields,
+ * set their values according to the `data` object (if a match can be found).
+
+This will modify the values of discovered named fields where they differ from the data object representation.
+
+#### opts
+
+The `opts` argument, when present, affects how corridor behaves in two ways.
+First, any values you specify will override the defaults for field value calculations.
+
+For example, say you set the `type` property to `binary`:
+
+```js
+corridor(null, null, {type:'binary'});
+```
+
+This means that any fields without an explicit `type` declared will be coerced to binary values.
+
+Secondly, some options give hints to corridor's higher level behavior.
+
+For example, the `enabledOnly` property controls whether corridor will operate on fields that are disabled by a `toggleable` parent.
+By default `enabledOnly` is set to `true`, meaning only enabled fields are included.
+You could set `enabledOnly` to `false` in the opts hash to tell corridor to ignore the effects of toggleables.
+
+### html API
+
+_TBD_
+
 ## issues and feature requests
 
 If you find any issues with corridor, or if you'd like to request a feature, please head over to the [issues page on github](https://github.com/jimbojw/corridor/issues).
