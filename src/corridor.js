@@ -260,14 +260,14 @@ var
    */
   upwalk = corridor.upwalk = function(elem, root, callback) {
     
-    var field, opts, res, bottom = elem;
+    var field, opts, res;
     
     while (elem !== null && elem.getAttribute) {
       
       field = undefined;
       if (elem.hasAttribute('data-field')) {
         field = elem.getAttribute('data-field') || undefined;
-      } else if (bottom === elem && elem.hasAttribute('name')) {
+      } else if (elem.hasAttribute('name')) {
         field = convertName(elem.getAttribute('name'));
       }
       
