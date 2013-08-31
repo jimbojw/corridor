@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <style>
     button { font-size: large; }
+    textarea { width: 100%; }
   </style>
 </head>
 <body>
@@ -24,7 +25,7 @@
       The generated package.json file appears here.
     </p>
     <div>
-      <textarea></textarea>
+      <textarea rows="8"></textarea>
     </div>
   </div>
   <hr />
@@ -37,47 +38,54 @@
   </div>
   <hr />
   <div class="input">
-    <h2>important fields</h2>
-    <p>
-      These fields are the most important to include.
-    </p>
-    <p>
-      <label>
-        name:
-        <input type="text" data-field='{"name":$$$}' data-opts='{"empty":"include"}'/>
-      </label>
-    </p>
-    <p>
-      <label>version: <input type="text" data-field='{"version":$$$}' /> </label>
-    </p>
+    <fieldset>
+      <h2>important fields</h2>
+      <p>
+        These fields are the most important to include.
+      </p>
+      <p>
+        <label>name: <input type="text" name="name"/></label>
+      </p>
+      <p>
+        <label>version: <input type="text" name='version' /></label>
+      </p>
+    </fieldset>
     <hr />
     <h2>less-important fields</h2>
     <p>
       These fields could be omitted if you like.
     </p>
-    <div data-opts='{"role":"toggleable"}'>
+    <fieldset>
+      <p>
+        <label>
+          homepage (will be omitted if empty):
+          <input type="text" name="homepage" data-opts='{"empty":"omit"}' value="https://npmjs.org/package/corridor" />
+        </label>
+      </p>
+    </fieldset>
+    <fieldset data-opts='{"role":"toggleable"}'>
       <p>
         <label>
           <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
           include authors?
         </label>
       </p>
-      <p data-field='{"authors":$$$}'>
+      <p>
         <label>
           first author:
-          <input data-field='[$$$]' data-opts='{"empty":"omit"}' value="jimbojw" />
+          <input type="text" name="authors[]" data-opts='{"empty":"omit"}' value="jimbojw" />
         </label>
         <label>
           second author:
-          <input data-field='[$$$]' data-opts='{"empty":"omit"}' />
+          <input type="text" name="authors[]" data-opts='{"empty":"omit"}' />
         </label>
         <label>
           third author:
-          <input data-field='[$$$]' data-opts='{"empty":"omit"}' />
+          <input type="text" name="authors[]" data-opts='{"empty":"omit"}' />
         </label>
       </p>
-    </div>
-    <div data-opts='{"role":"toggleable"}'>
+    </fieldset>
+    <fieldset data-opts='{"role":"toggleable"}'>
       <p>
         <label>
           <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
@@ -87,11 +95,11 @@
       <p>
         <label>
           keywords (list format):
-          <textarea data-field='{"keywords":$$$}' data-opts='{"type":"list"}'></textarea>
+          <textarea name="keywords" data-opts='{"type":"list"}'>foo bar</textarea>
         </label>
       </p>
-    </div>
-    <div data-opts='{"role":"toggleable"}'>
+    </fieldset>
+    <fieldset data-opts='{"role":"toggleable"}'>
       <p>
         <label>
           <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
@@ -101,21 +109,21 @@
       <p>
         <label>
           bin (must be JSON):
-          <textarea data-field='{"bin":$$$}' data-opts='{"type":"json"}'>{ "npm" : "./cli.js" }</textarea>
+          <textarea name="bin" data-opts='{"type":"json"}'>{ "npm" : "./cli.js" }</textarea>
         </label>
       </p>
-    </div>
-    <div data-opts='{"role":"toggleable"}'>
+    </fieldset>
+    <fieldset data-opts='{"role":"toggleable"}'>
       <p>
         <label>
           <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
           include dependencies?
         </label>
       </p>
-      <p data-field='{"dependencies":$$$}'>
+      <p>
         <label>
           foo:
-          <select data-field='{"foo":$$$}'>
+          <select name="dependencies.foo">
             <option value="~0.1.0">foo: ~0.1.0</option>
             <option value="~1.1.0">foo: ~1.1.0</option>
             <option value="~2.1.0">foo: ~2.1.0</option>
@@ -123,14 +131,14 @@
         </label>
         <label>
           bar:
-          <select data-field='{"bar":$$$}'>
+          <select name="dependencies.bar">
             <option value="~0.1.0">bar: ~0.1.0</option>
             <option value="~1.1.0">bar: ~1.1.0</option>
             <option value="~2.1.0">bar: ~2.1.0</option>
           </select>
         </label>
       </p>
-    </div>
+    </fieldset>
   </div>
 </div>
 <script src="src/corridor.js"></script>
