@@ -15,9 +15,17 @@ exports.testConvertName = function(test) {
       field: '{"foo":{"bar":$$$}}',
       reason: 'dot nested name parts should become a nested object field'
     },{
+      name: 'foo bar',
+      field: '{"foo bar":$$$}',
+      reason: 'whitespace inside field names should be preserved'
+    },{
       name: 'a.b.c.d.e',
       field: '{"a":{"b":{"c":{"d":{"e":$$$}}}}}',
       reason: 'dot nested name parts can nest to any level'
+    },{
+      name: 'a b.c d.e f',
+      field: '{"a b":{"c d":{"e f":$$$}}}',
+      reason: 'spaces in dot nested name parts should be preserved'
     },{
       name: '[]',
       field: '[$$$]',
@@ -30,6 +38,14 @@ exports.testConvertName = function(test) {
       name: '[].name',
       field: '[{"name":$$$}]',
       reason: 'empty square brackets alone should contribute to an array'
+    },{
+      name: 'person[]name',
+      field: '{"person":[{"name":$$$}]}',
+      reason: 'unprefixed key after square brackets should still be a key'
+    },{
+      name: '[][]',
+      field: '[[$$$]]',
+      reason: 'nested square brackets should create an array in an array'
     },{
       name: 'list[]',
       field: '{"list":[$$$]}',
