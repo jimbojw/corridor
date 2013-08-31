@@ -208,9 +208,14 @@ var
     type: "string",
     
     /**
-     * Only operate on enabled fields when this is true (the default).
+     * When inserting/extracting, only operate on enabled fields (default: true).
      */
-    enabledOnly: true
+    enabledOnly: true,
+    
+    /**
+     * When selecting fields, include any elements with a 'name' attribute (default: true).
+     */
+    namedFields: true
     
   },
   
@@ -223,9 +228,11 @@ var
    */
   selectFields = corridor.selectFields = function(root, opts) {
     
-    var settings = extend({}, defaults, opts);
+    var
+      settings = extend({}, defaults, opts),
+      selector = '[data-field]' + (settings.namedFields ? ', [name]' : '');
     
-    return slice.call(root.querySelectorAll('[data-field]'));
+    return slice.call(root.querySelectorAll(selector));
     
   },
   
@@ -439,10 +446,12 @@ var
         });
     
     if (!candidates.length) {
+      log('No child "toggle" element found for toggelable.', elem);
       throw Error('No child "toggle" element found for toggelable.');
     }
     
     if (candidates.length > 1) {
+      log('Multiple "toggle" elements have been found for toggleable.', elem);
       throw Error('Multiple "toggle" elements have been found for toggleable.');
     }
     
