@@ -484,7 +484,106 @@ The `data-opts` attribute, when present, contains JSON that overrides the defaul
 
 #### name attribute
 
+corridor uses the `name` attribute of an element to figure out how the _value_ of that element relates to the _data_ representation.
+There are two formats you can use when specifying the name of an element: name format and field format.
+
+_Note: better names for "name format" and "field format" are forthcoming._
+
+#### name format
+
+The name format is the more natural of the two formats.
+In name format, the value resembles how you'd access a nested value inside an object in JavaScript.
+
+For instance, say your JSON representation is this:
+
+```js
+{
+  "book": {
+    "title": "The Art of War"
+  }
+}
+```
+
+Then an input that maps to the `title` would have `name="book.title"`:
+
+```html
+<input type="text" name="book.title" value="The Art of War"/>
+```
+
+In name format, use periods to separate keys.
+They can nest to arbitrary depth, e.g. `{"a":{"b":{"c":"foo"}}}` maps to the element with `name="a.b.c"`.
+
+You can also use brackets to indicate a subkey (as opposed to using a period `.`).
+For example, the following are all equivalent to `name="a.b.c"`:
+
+ * `name="[a][b][c]"`
+ * `name="a[b]c"`
+ * `name="a[b].c"`
+ * `name="a.b[c]"`
+
+Whitespace is trimmed from the beginning and ending of keys, but not inside.
+So `name="a b"` is different from `name="a     b"`, but all of the following are equivalent to `name="a.b.c"`:
+
+ * `name="[ a ][ b ][ c ]"`
+ * `name=" a.b.c "`
+ * `name="a[b].   c"`
+ * `name="a.   b[c]"`
+
+Finally, a pair of square brackets with nothing inside (`[]`) means that the value should contribute to an array.
+Consider this HTML:
+
+```html
+<input type="text" name="book.authors[]" value="Sunzi"/>
+<input type="text" name="book.authors[]" value="Giles, Lionel"/>
+```
+
+With corridor, this would map to the following data representation:
+
+```js
+{
+  "book": {
+    "authors": [
+      "Sunzi",
+      "Giles, Lionel"
+    ]
+  }
+}
+```
+
+Where you're appending to an array, you'll probably want the square brackets at the end, but this isn't strictly necessary.
+Your name attribute can have additional keys and bracket pairs after the first.
+Here are a few example names and the JSON data they'd map to:
+
+```js
+// <input name="authors[]name" value="Sunzi" />
+{
+  "authors": [
+    { "name": "Sunzi" }
+  ]
+}
+```
+
+```js
+// <input name="authors[][]" value="Sunzi" />
+{
+  "authors": [
+    [ "Sunzi" ]
+  ]
+}
+```
+
+```js
+// <input name="[][author]" value="Sunzi" />
+[ { "author": "Sunzi" } ]
+```
+
+In most cases, using name format for your name attributes will give you what you need to correctly shuttle data between your JSON and your HTML.
+However, if your JSON is quite complex, you may need to use field format for some of your elements.
+
+#### field format
+
 _TBD_
+
 
 ## issues and feature requests
 
