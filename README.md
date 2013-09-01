@@ -134,16 +134,18 @@ If you don't provide one, corridor will assume you meant to search down from the
 By default, corridor will assume that the value provided by a field is a string.
 However, you can override this by specifiying a type.
 
-To give options to corridor for a particular HTML element, give it a `data-opts` attribute.
+To give options to corridor for a particular HTML element, you can specify them with `data-*` attributes.
+The `data-type` attribute tells corridor how to interpret the value of the element.
+
 Let's see how this applies to the `keywords` field of a package.json.
 
 The HTML for the keywords field should look like this:
 
 ```html
-<textarea name="keywords" data-opts='{"type":"list"}'></textarea>
+<textarea name="keywords" data-type="list"></textarea>
 ```
 
-Here the `type` property indicates that we have a `list` value.
+Here the `data-type` indicates that we have a `list` value.
 corridor will try to parse the text in the `<textarea>` as a list of items, and will output an array.
 
 Let's give it a try!
@@ -170,9 +172,27 @@ Supported data types include:
  * list - parses value as a list.
  * json - treats value as valid JSON.
 
+If you can't set `data-type` because your application already uses this attribute for something else, you can use `data-opts` instead.
+Here's how it would look with `data-opts`:
+
+```html
+<textarea name="keywords" data-opts='{"type":"list"}'></textarea>
+```
+
+The `data-opts` attribute, when present, must contain valid JSON.
+Note that options specified in `data-opts` will override `data-*` attributes.
+
+Take this input for example:
+
+```html
+<input type="text" name="zip" data-type="string" data-opts='{"type":"number"}' />
+```
+
+In this case, corridor will treat the zip as a number.
+
 ### corridor field nesting
 
-The real strength of corridor emerges when you create nested structures.
+corridor will use parent elements' names to create nested structures.
 
 For example, say we wanted to have drop-down choices for the `foo` and `bar` dependencies.
 The corridor HTML for that would look something like this:
@@ -229,7 +249,7 @@ Since both the `foo` and `bar` select boxes live under `dependencies`, giving a 
 </p>
 ```
 
-If you run corridor in this, you'll get the same JSON listed above.
+If you run corridor against this HTML, you'll get the same JSON listed above.
 
 Merging works best for objects like the `dependencies` object we just looked at.
 But corridor can also merge arrays.
@@ -252,11 +272,11 @@ The HTML for that might look like this:
   </label>
   <label>
     second author:
-    <input type="text" name="authors[]" data-opts='{"empty":"omit"}' />
+    <input type="text" name="authors[]" data-empty="omit" />
   </label>
   <label>
     third author:
-    <input type="text" name="authors[]" data-opts='{"empty":"omit"}' />
+    <input type="text" name="authors[]" data-empty="omit" />
   </label>
 </fieldset>
 ```
@@ -291,7 +311,7 @@ E.g.
 You can mix and match dot delimited paths and square brackets to create even richer structures.
 
 ```html
-<input type="text" name="stock.ticker[]symbols" value="BCOV AMZN" data-opts='{"type":"list"}' />
+<input type="text" name="stock.ticker[]symbols" value="BCOV AMZN" data-type="list" />
 ```
 
 Produces this:
@@ -314,23 +334,23 @@ For example `name=" foo bar "` would produce an object with a `foo bar` property
 
 ### toggling sections
 
-You can mark sections of your UI as being toggleable using the `role` option in an element's `data-opts`.
+You can mark sections of your UI as being toggleable using the `role` option.
 
 For example, say you wanted a checkbox to control whether `keywords` were going to be included in the output.
 The HTML for that might look like this:
 
 ```html
-<fieldset data-opts='{"role":"toggleable"}'>
+<fieldset data-role="role">
   <p>
     <label>
-      <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+      <input type="checkbox" data-role="toggle" checked/>
       include keywords?
     </label>
   </p>
   <p>
     <label>
       keywords (list format):
-      <textarea name="keywords" data-opts='{"type":"list"}'></textarea>
+      <textarea name="keywords" data-type="list"></textarea>
     </label>
   </p>
 </fieldset>
@@ -355,7 +375,7 @@ corridor(document.body, {
 });
 ```
 
-corridor uses the same `name` and `data-opts` attributes to determine where data values should be inserted.
+corridor uses the same `name` and `data-*` attributes to determine where data values should be inserted.
 
 ## corridor API
 
@@ -470,7 +490,7 @@ Specificially, it looks at these things:
 
  * the tag name,
  * the `name` (or `data-name`) attribute, and
- * the `data-opts` attribute.
+ * the `data-*` (or `data-opts`) attributes.
 
 The tag name influences whether corridor considers an element to have a value, and if so, how to retrieve it.
 For instance, the way you extract a value from a `<textarea>` differs from how you extract a value from a `<select>` element.
@@ -479,8 +499,7 @@ The `name` attribute is by far the most important one to corridor.
 The presence of a `name` attribute (or `data-name`) tells corridor that an element should be considered for data insertion/extraction.
 The content of this attribute tells corridor exactly how to shuttle data between the element's value and the data representation.
 
-The `data-opts` attribute, when present, contains JSON that overrides the default options (see the _opts_ section above).
-`data-opts` is also used to denote elements that are `toggleable` or perform the role of a `toggle` control for a toggleable section.
+The `data-*` attributes, when present, override the default options (see the _opts_ section above).
 
 #### name attribute
 
@@ -614,6 +633,15 @@ Here are some name format strings and their field format equivalents:
 
 When possible, you should use the name format for your name attributes.
 But there are some rare cases where field format is the better option.
+
+#### data-opts attribute
+
+Just as `data-*` attributes override the default options, `data-opts` can also be used to override options.
+If present, the `data-opts` attribute must contain valid JSON.
+
+For example `data-type="list"` is the same as `data-opts='{"type":"list"}'`.
+When both a `data-*` attribute and a `data-opts` key have the same name (like in this list example) corridor will use the value in `data-opts`.
+This way, if your application already uses a `data-*` attribute that would conflict with corridor, you can use `data-opts` instead.
 
 ## issues and feature requests
 
