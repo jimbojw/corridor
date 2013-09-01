@@ -582,8 +582,26 @@ However, if your JSON is quite complex, you may need to use field format for som
 
 #### field format
 
-_TBD_
+Whereas name format resembles how you'd _access_ an object in JavaScript, field format resembles how you describe an object in JavaScript—that is, JSON.
 
+With field format, you specify how your data should appear as properly formatted JSON.
+Except that you replace the value with the literal string `$$$`.
+
+For example, consider the name format string `book.title`.
+The field format version would be `{"book":{"title":$$$}}`.
+Any name format string can be converted to field format, but the opposite is not always true.
+
+Here are some name format strings and their field format equivalents:
+
+ * `title` &rarr; `{"title":$$$}`
+ * `book.title` &rarr; `{"book":{"title":$$$}}`
+ * `authors[]` &rarr; `{"authors":[$$$]}`
+ * `authors[]name` &rarr; `{"authors":[{"name":$$$}]}`
+ * `[]` &rarr; `[$$$]`
+ * `a.b.c` &rarr; `{"a":{"b":{"c":$$$}}}`
+
+When possible, you should use the name format for your name attributes.
+But there are some rare cases where field format is the better option.
 
 ## issues and feature requests
 
