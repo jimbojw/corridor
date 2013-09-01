@@ -453,6 +453,7 @@ corridor(null, null, {type:'binary'});
 ```
 
 This means that any fields without an explicit `type` declared will be coerced to binary values.
+Fields with an explicit type (either as `data-type` or in `data-opts`) will stilly use their specified type though.
 
 Secondly, some options give hints to corridor's higher level behavior.
 
