@@ -4,13 +4,54 @@
 
 Bi-directional data binding without the fuss.
 
-## why corridor
+## why you need corridor
 
 Your data is in JSON, but your users interact with HTML.
-corridor's singular mission is to shuttle your data between your JSON and your HTML.
+corridor's only mission is to shuttle your data between your JSON and your HTML.
 
-It is a runtime library, not a templating language.
-corridor runs in the browser, able to transfer your data both ways: from form fields to JSON and back again.
+In a nutshell, corridor gives you the power to turn this:
+
+```html
+<fieldset name="project">
+  <input type="text" name="dependencies.foo" value="~0.1.0" />
+  <input type="text" name="dependencies.bar" value="~2.1.0" />
+</fieldset>
+```
+
+Into this:
+
+```js
+{
+  "project": {
+    "dependencies": {
+      "foo": "~0.1.0",
+      "bar": "~2.1.0"
+    }
+  }
+}
+```
+
+And vice versa.
+
+### how corridor works
+
+corridor is a runtime library, not a templating language.
+It runs in the browser, easily transferring your data both ways: from form fields to JSON and (importantly) back again.
+
+corridor uses the `name` attributes of your HTML elements to determine how a given input contributes to a JSON representation.
+In most cases it'll just work, but if you need more flexibility, corridor's API options offer many points of customization.
+
+Read the tutorial to get started, or skip to the API section for the details.
+
+### corridor's philosophy
+
+The corridor project philosophy boils down to these points:
+
+ * **unobtrusive** — corridor presents just one function, has no dependencies, and causes no side-effects.
+ * **intelligent** — corridor learns what to do by looking at the data, not by being told (except where you want to).
+ * **clear** — corridor's code, functionality, tests, milestones and issues are all well documented and easy to follow.
+
+Development of features, bugfixes and documentation are held to these ideals.
 
 ## getting corridor
 
@@ -315,6 +356,264 @@ corridor(document.body, {
 ```
 
 corridor uses the same `name` and `data-opts` attributes to determine where data values should be inserted.
+
+## corridor API
+
+The corridor API consists of two major parts: the `corridor()` function itself, and the information in the HTML it uses to make decisions about how to operate.
+
+### corridor() function
+
+The corridor function takes three parameters, all optional:
+
+```
+corridor([root], [data], [opts])
+```
+
+The parameters are:
+
+ * `root` — The starting DOM element to search for named fields (defaults to `document`).
+ * `data` — The plain JSON data object whose values are to be inserted.
+ * `opts` — Additional options to inform how corridor makes decisions.
+
+The presence of the second parameter, `data`, tells corridor whether it should extract data from the DOM or insert data into it.
+
+#### extracting data
+
+To extract data from the DOM, call `corridor()` without the second argument, or set it to null.
+
+Examples:
+
+```js
+corridor();
+corridor(root);
+corridor(root, null, opts);
+corridor(null, null, opts);
+```
+
+In _extract mode_, corridor will:
+
+ * start at the `root` element,
+ * find all named fields,
+ * extract their values, and
+ * return the plain JSON data object that results.
+
+This is completely safe.
+No side-effects are produced as a result of this operation, just data extraction.
+
+#### inserting data
+
+To insert data into the DOM, call `corridor()` with an object as the second argument.
+
+Examples:
+
+```js
+corridor(null, data);
+corridor(root, data);
+corridor(null, data, options);
+corridor(root, data, options);
+```
+
+In _insert mode_, corridor will:
+
+ * start at the `root` element,
+ * find all named fields,
+ * set their values according to the `data` object (if a match can be found).
+
+This will modify the values of discovered named fields where they differ from the data object representation.
+
+#### opts
+
+The `opts` argument, when present, affects how corridor behaves in two ways.
+First, any values you specify will override the defaults for field value calculations.
+
+For example, say you set the `type` property to `binary`:
+
+```js
+corridor(null, null, {type:'binary'});
+```
+
+This means that any fields without an explicit `type` declared will be coerced to binary values.
+
+Secondly, some options give hints to corridor's higher level behavior.
+
+For example, the `enabledOnly` property controls whether corridor will operate on fields that are disabled by a `toggleable` parent.
+By default `enabledOnly` is set to `true`, meaning only enabled fields are included.
+You could set `enabledOnly` to `false` in the opts hash to tell corridor to ignore the effects of toggleables.
+
+Options that apply to any field are:
+
+ * **type** — The kind of field this is. Choices are:
+  - _string_ - treate the value as a string (default)
+  - _boolean_ - coerce this value to something true/false
+  - _number_ - parse this value as a number
+  - _json_ - leave this value as-is (will choke if it's not actually valid JSON)
+  - _list_ - parse this value as a list of values
+ * **empty** — If a field has a falsey value, this option determines whether it still contributes to the output. Choices are:
+  - _include_ - include the value in the output (default)
+  - _omit_ - do not add the field at all
+
+Options specific to the `toggleable`/`toggle` functionality are:
+
+ * **role** — The role that this element plays in corridor operations. Choices are:
+  - _field_ - this element is a field whose value will contribute to extracted data (default)
+  - _toggleable_ - this element contains fields and may be toggled on or off
+  - _toggle_ - this element is a checkbox which toggles its nearest parent toggleable
+ * **enabledOnly** — (boolean) When inserting/extracting, only operate on enabled fields (default: true).
+
+Keep in mind that setting options via the `opts` param specifically affects the execution of the corridor function once.
+Persistent options should be stored in the HTML.
+
+### HTML API
+
+corridor inspects the Document Object Model (DOM) at runtime to figure out how to extract and insert data.
+Specificially, it looks at these things:
+
+ * the tag name,
+ * the `name` (or `data-name`) attribute, and
+ * the `data-opts` attribute.
+
+The tag name influences whether corridor considers an element to have a value, and if so, how to retrieve it.
+For instance, the way you extract a value from a `<textarea>` differs from how you extract a value from a `<select>` element.
+
+The `name` attribute is by far the most important one to corridor.
+The presence of a `name` attribute (or `data-name`) tells corridor that an element should be considered for data insertion/extraction.
+The content of this attribute tells corridor exactly how to shuttle data between the element's value and the data representation.
+
+The `data-opts` attribute, when present, contains JSON that overrides the default options (see the _opts_ section above).
+`data-opts` is also used to denote elements that are `toggleable` or perform the role of a `toggle` control for a toggleable section.
+
+#### name attribute
+
+corridor uses the `name` attribute of an element to figure out how the _value_ of that element relates to the _data_ representation.
+
+You can also use the `data-name` attribute instead.
+corridor will actually check the `data-name` attribute first and use it if present, falling back to plain `name`.
+This serves two purposes.
+
+First, strictly speaking, not all HTML5 elements allow the `name` attribute.
+But HTML5 doel allow `data-` prefixed attributes on any element.
+If you want to assign a name to a `p` or a `div` tag, for example, you should use `data-name`.
+
+Secondly, `data-name` supplies an alternative should your application require that the `name` field has a specific value.
+If you need to keep `name` the same, but want corridor to address it by a different name value, you'd use `data-name`.
+
+There are two formats you can use when specifying the name of an element: name format and field format.
+
+_Note: better names for "name format" and "field format" are forthcoming._
+
+#### name format
+
+The name format is the more natural of the two formats.
+In name format, the value resembles how you'd access a nested value inside an object in JavaScript.
+
+For instance, say your JSON representation is this:
+
+```js
+{
+  "book": {
+    "title": "The Art of War"
+  }
+}
+```
+
+Then an input that maps to the `title` would have `name="book.title"`:
+
+```html
+<input type="text" name="book.title" value="The Art of War"/>
+```
+
+In name format, use periods to separate keys.
+They can nest to arbitrary depth, e.g. `{"a":{"b":{"c":"foo"}}}` maps to the element with `name="a.b.c"`.
+
+You can also use brackets to indicate a subkey (as opposed to using a period `.`).
+For example, the following are all equivalent to `name="a.b.c"`:
+
+ * `name="[a][b][c]"`
+ * `name="a[b]c"`
+ * `name="a[b].c"`
+ * `name="a.b[c]"`
+
+Whitespace is trimmed from the beginning and ending of keys, but not inside.
+So `name="a b"` is different from `name="a     b"`, but all of the following are equivalent to `name="a.b.c"`:
+
+ * `name="[ a ][ b ][ c ]"`
+ * `name=" a.b.c "`
+ * `name="a[b].   c"`
+ * `name="a.   b[c]"`
+
+Finally, a pair of square brackets with nothing inside (`[]`) means that the value should contribute to an array.
+Consider this HTML:
+
+```html
+<input type="text" name="book.authors[]" value="Sunzi"/>
+<input type="text" name="book.authors[]" value="Giles, Lionel"/>
+```
+
+With corridor, this would map to the following data representation:
+
+```js
+{
+  "book": {
+    "authors": [
+      "Sunzi",
+      "Giles, Lionel"
+    ]
+  }
+}
+```
+
+Where you're appending to an array, you'll probably want the square brackets at the end, but this isn't strictly necessary.
+Your name attribute can have additional keys and bracket pairs after the first.
+Here are a few example names and the JSON data they'd map to:
+
+```js
+// <input name="authors[]name" value="Sunzi" />
+{
+  "authors": [
+    { "name": "Sunzi" }
+  ]
+}
+```
+
+```js
+// <input name="authors[][]" value="Sunzi" />
+{
+  "authors": [
+    [ "Sunzi" ]
+  ]
+}
+```
+
+```js
+// <input name="[][author]" value="Sunzi" />
+[ { "author": "Sunzi" } ]
+```
+
+In most cases, using name format for your name attributes will give you what you need to correctly shuttle data between your JSON and your HTML.
+However, if your JSON is quite complex, you may need to use field format for some of your elements.
+
+#### field format
+
+Whereas name format resembles how you'd _access_ an object in JavaScript, field format resembles how you describe an object in JavaScript—that is, JSON.
+
+With field format, you specify how your data should appear as properly formatted JSON.
+Except that you replace the value with the literal string `$$$`.
+
+For example, consider the name format string `book.title`.
+The field format version would be `{"book":{"title":$$$}}`.
+Any name format string can be converted to field format, but the opposite is not always true.
+
+Here are some name format strings and their field format equivalents:
+
+ * `title` &rarr; `{"title":$$$}`
+ * `book.title` &rarr; `{"book":{"title":$$$}}`
+ * `authors[]` &rarr; `{"authors":[$$$]}`
+ * `authors[]name` &rarr; `{"authors":[{"name":$$$}]}`
+ * `[]` &rarr; `[$$$]`
+ * `a.b.c` &rarr; `{"a":{"b":{"c":$$$}}}`
+
+When possible, you should use the name format for your name attributes.
+But there are some rare cases where field format is the better option.
 
 ## issues and feature requests
 

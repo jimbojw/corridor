@@ -35,6 +35,10 @@ exports.testConvertName = function(test) {
       field: '[$$$]',
       reason: 'whitespace in square brackets alone should be treated as empty'
     },{
+      name: '[name]',
+      field: '{"name":$$$}',
+      reason: 'brackets around a solitary key should become a property field'
+    },{
       name: '[].name',
       field: '[{"name":$$$}]',
       reason: 'empty square brackets alone should contribute to an array'
@@ -62,6 +66,14 @@ exports.testConvertName = function(test) {
       name: 'foo[bar].baz[]',
       field: '{"foo":{"bar":{"baz":[$$$]}}}',
       reason: 'mixing bracket and dot key styles is fine'
+    },{
+      name: '{"authors":$$$}',
+      field: '{"authors":$$$}',
+      reason: 'presence of $$$ anywhere should indicate field format'
+    },{
+      name: '[$$$]',
+      field: '[$$$]',
+      reason: 'presence of $$$ anywhere should indicate field format'
     }
   ];
   
