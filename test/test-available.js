@@ -4,7 +4,7 @@
 
 var corridor = require('../src/corridor.js');
 
-exports.testAvailable = function(test) {
+exports['basic availability'] = function(test) {
   
   test.expect(2);
   test.ok(corridor, 'corridor exists');
