@@ -479,7 +479,7 @@ var
       
       // find all the candidate "toggle" elements.
       // to be a candidate, the descendent's nearest parent "toggleable" must be elem.
-      candidates = slice.call(elem.querySelectorAll('[data-opts]'))
+      candidates = slice.call(elem.querySelectorAll('[data-role], [data-opts]'))
         .filter(function(child){
           if (options(child).role !== 'toggle') {
             return false;
@@ -509,12 +509,18 @@ var
   },
   
   /**
-   * Get the options for a given element know to have a data-opts attribute.
+   * Get the options for a given element.
    * @param {HTMLElement} elem The element to inspect.
    * @param {mixed} defs Optional defaults object to start from.
    */
   options = corridor.options = function(elem, defs) {
-    return extend({}, defs || {}, JSON.parse(elem.getAttribute('data-opts') || '{}'));
+    var key, opts = extend({}, defs || {});
+    for (key in defaults) {
+      if (elem.hasAttribute('data-' + key)) {
+        opts[key] = elem.getAttribute('data-' + key);
+      }
+    }
+    return extend(opts, JSON.parse(elem.getAttribute('data-opts') || '{}'));
   },
   
   /**
