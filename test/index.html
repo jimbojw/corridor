@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>corridor — browser tests</title>
+  <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture">
+    
+    <div id="extract-tests">
+      
+      <div id="simple names">
+        
+        <script type="application/json">
+          {
+            "name": "Bob",
+            "email": "bob@example.com"
+          }
+        </script>
+        
+        <div>
+          
+          <label>
+            <span>name: </span>
+            <input type="text" name="name" value="Bob" />
+          </label>
+          <label>
+            <span>email: </span>
+            <input type="text" name="email" value="bob@example.com" />
+          </label>
+          
+        </div>
+        
+      </div>
+      
+      <div id="nested simple names">
+        
+        <script type="application/json">
+          {
+            "record": {
+              "person": {
+                "name": "Bob",
+                "email": "bob@example.com"
+              }
+            }
+          }
+        </script>
+        
+        <div>
+          
+          <fieldset name="record">
+            <label>
+              <span>name: </span>
+              <input type="text" name="person.name" value="Bob" />
+            </label>
+            <label>
+              <span>email: </span>
+              <input type="text" name="person.email" value="bob@example.com" />
+            </label>
+          </fieldset>
+          
+        </div>
+        
+      </div>
+      
+    </div><!-- /extract tests -->
+    
+    <div id="insert-tests">
+      
+      <div id="simple names">
+        
+        <script type="application/json">
+          {
+            "name": "Bob",
+            "email": "bob@example.com"
+          }
+        </script>
+        
+        <div>
+          
+          <label>
+            <span>name: </span>
+            <input type="text" name="name" />
+          </label>
+          <label>
+            <span>email: </span>
+            <input type="text" name="email" />
+          </label>
+          
+        </div>
+        
+      </div>
+      
+      <div id="nested simple names">
+        
+        <script type="application/json">
+          {
+            "record": {
+              "person": {
+                "name": "Bob",
+                "email": "bob@example.com"
+              }
+            }
+          }
+        </script>
+        
+        <div>
+          
+          <fieldset name="record">
+            <label>
+              <span>name: </span>
+              <input type="text" name="person.name" />
+            </label>
+            <label>
+              <span>email: </span>
+              <input type="text" name="person.email" />
+            </label>
+          </fieldset>
+          
+        </div>
+        
+      </div>
+      
+    </div><!-- /insert-tests -->
+    
+  </div>
+<script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
+<script src="../src/corridor.js"></script>
+<script>
+// setup shim for nodeunit tests
+window.require = function() { return corridor; }
+window.exports = {};
+</script>
+<script src="test-available.js"></script>
+<script src="test-merge.js"></script>
+<script src="test-convertname.js"></script>
+<script>
+// run unit tests
+(function(exports){
+  
+  var
+    
+    ext = window.ext = function(obj) {
+      var i, ii, arg, k;
+      for (i = 1, ii = arguments.length; i < ii; i++) {
+        arg = arguments[i];
+        for (k in arg) {
+          obj[k] = arg[k];
+        }
+      }
+      return obj;
+    },
+    
+    shim = {
+      equals: QUnit.equal,
+      done: QUnit.start
+    };
+  
+  for (var name in exports) {
+    (function(name, fn) {
+      QUnit.asyncTest('unit — ' + name, function(test) {
+        return fn(ext({}, QUnit, shim, test));
+      });
+    })(name, exports[name]);
+  }
+
+})(exports);
+</script>
+<script>
+// run integration tests
+QUnit.test('integration — extract()', function() {
+  
+  var
+    i, ii, test,
+    tests = document.getElementById('extract-tests').childNodes;
+  
+  for (i = 0, ii = tests.length; i < ii; i++) {
+    if (tests[i].nodeType === 1) {
+      (function(script, root) {
+        
+        var
+          actual = corridor(root),
+          expected = JSON.parse(script.textContent);
+          
+        QUnit.deepEqual(actual, expected, this.id);
+        
+      }).apply(tests[i], tests[i].getElementsByTagName('*'));
+    }
+  }
+  
+});
+QUnit.test('integration — insert()', function() {
+  
+  var
+    i, ii, test,
+    tests = document.getElementById('extract-tests').childNodes;
+  
+  for (i = 0, ii = tests.length; i < ii; i++) {
+    if (tests[i].nodeType === 1) {
+      (function(script, root) {
+        
+        var original = JSON.parse(script.textContent);
+        
+        // insert data with corridor
+        corridor(root, original);
+        
+        var actual = corridor(root);
+        
+        QUnit.deepEqual(actual, original, this.id);
+        
+      }).apply(tests[i], tests[i].getElementsByTagName('*'));
+    }
+  }
+  
+});
+</script>
+</body>
+</html>

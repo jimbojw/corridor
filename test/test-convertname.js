@@ -4,7 +4,7 @@
 
 var corridor = require('../src/corridor.js');
 
-exports.testConvertName = function(test) {
+exports['corridor.convertName()'] = function(test) {
   
   var suite = [{
       name: 'name',

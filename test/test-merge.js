@@ -4,7 +4,7 @@
 
 var corridor = require('../src/corridor.js');
 
-exports.testMerge = function(test) {
+exports['corridor.merge()'] = function(test) {
   
   var suite = [{
       obj: ['a'],
