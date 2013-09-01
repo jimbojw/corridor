@@ -85,17 +85,17 @@
         </label>
       </p>
     </fieldset>
-    <fieldset data-role="toggleable">
+    <fieldset data-opts='{"role":"toggleable"}'>
       <p>
         <label>
-          <input type="checkbox" data-role="toggle" checked/>
+          <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
           include keywords?
         </label>
       </p>
       <p>
         <label>
           keywords (list format):
-          <textarea name="keywords" data-opts='{"type":"list"}'>foo bar</textarea>
+          <textarea name="keywords" data-type="list">foo bar</textarea>
         </label>
       </p>
     </fieldset>
@@ -109,7 +109,7 @@
       <p>
         <label>
           bin (must be JSON):
-          <textarea name="bin" data-opts='{"type":"json"}'>{ "npm" : "./cli.js" }</textarea>
+          <textarea name="bin" data-type="json">{ "npm" : "./cli.js" }</textarea>
         </label>
       </p>
     </fieldset>
