@@ -666,21 +666,29 @@ Once you've forked the project, clone it using `git clone`:
 $ git clone git@github.com:<YOUR_USERNAME>/corridor.git
 ```
 
+The source code for corridor itself is in the `src/` directory.
+
 corridor uses npm for packaging and deployment, so you'll need to install Node.js if you haven't already.
-Once you have node, you can pull in corridor's development dependencies:
+Once you have Node, you can pull in corridor's development dependencies:
 
 ```sh
 $ npm install
 ```
 
-After installing the dependencies, you can run the unit tests:
+### testing corridor
+
+The corridor unit tests are in the `test/` directory.
+corridor's unit tests are written to run in [nodeunit](https://npmjs.org/package/nodeunit) or with [QUnit](http://qunitjs.com/).
+
+After installing the npm dependencies, you can run the corridor unit tests from the command line like this:
 
 ```sh
 $ npm test
 ```
 
-The source code for corridor is in the `src/` directory, and unit tests are under `test/`.
-corridor's unit tests are written for [nodeunit](https://npmjs.org/package/nodeunit).
+To run the unit tests in the browser, just open `test/index.html` and they'll run automatically.
+
+### submitting changes
 
 When you're satisfied with your changes, commit them and push them to your forked repository.
 Then open a pull request in github by hitting the big "Pull Request" button from the main project repo page.
