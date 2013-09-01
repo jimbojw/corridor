@@ -35,6 +35,10 @@ exports.testConvertName = function(test) {
       field: '[$$$]',
       reason: 'whitespace in square brackets alone should be treated as empty'
     },{
+      name: '[name]',
+      field: '{"name":$$$}',
+      reason: 'brackets around a solitary key should become a property field'
+    },{
       name: '[].name',
       field: '[{"name":$$$}]',
       reason: 'empty square brackets alone should contribute to an array'
