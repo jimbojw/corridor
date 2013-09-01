@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>corridor — browser tests</title>
+  <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+<script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
+<script src="../src/corridor.js"></script>
+<script>
+window.require = function() { return corridor; }
+window.exports = {};
+</script>
+<script src="test-available.js"></script>
+<script src="test-merge.js"></script>
+<script src="test-convertname.js"></script>
+<script>
+(function(exports){
+  
+  var
+    
+    ext = window.ext = function(obj) {
+      var i, ii, arg, k;
+      for (i = 1, ii = arguments.length; i < ii; i++) {
+        arg = arguments[i];
+        for (k in arg) {
+          obj[k] = arg[k];
+        }
+      }
+      return obj;
+    },
+    
+    shim = {
+      equals: QUnit.equal,
+      done: QUnit.start
+    };
+  
+  for (var name in exports) {
+    (function(name, fn) {
+      QUnit.asyncTest(name, function(test) {
+        return fn(ext({}, QUnit, shim, test));
+      });
+    })(name, exports[name]);
+  }
+
+})(exports);
+</script>
+</body>
+</html>
