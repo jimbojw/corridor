@@ -38,7 +38,6 @@ var
    * @param {object} opts Hash of options (optional)
    * Relevant options are:
    *  - enabledOnly - Whether to only include enabled elements
-   *  - namedFields - Whether to include fields with a 'name' attribute
    */
   corridor = context[property] = function(root, data, opts) {
     root = root || document;
@@ -123,7 +122,7 @@ var
       fields = fields.filter(enabled);
     }
     
-    // for each value'd, enabled data-field
+    // for each value'd, enabled field
     fields
       .map(function(elem) {
         
@@ -214,35 +213,21 @@ var
     /**
      * When inserting/extracting, only operate on enabled fields (default: true).
      */
-    enabledOnly: true,
-    
-    /**
-     * When selecting fields, include any elements with a 'name' attribute (default: true).
-     */
-    namedFields: true
+    enabledOnly: true
     
   },
   
   /**
    * Select an array of field elements from the specified root element.
    * @param {HTMLElement} root The root element to search for fields.
-   * @param {object} opts Options hash to affect selection behavior (optional).
-   * Relevant options are:
-   *  - namedFields - Whether to include elements with a 'name' attribute
    */
   selectFields = corridor.selectFields = function(root, opts) {
-    
-    var
-      settings = extend({}, defaults, opts),
-      selector = '[data-field]' + (settings.namedFields ? ', [name]' : '');
-    
-    return slice.call(root.querySelectorAll(selector));
-    
+    return slice.call(root.querySelectorAll('[name], [data-name]'));
   },
   
   /**
    * Visit each corridor ancestor element up from the specified starting node.
-   * An element is a corridor element if it has a data-field or data-opts attribute.
+   * An element is a corridor element if it has a name, data-name or data-opts attribute.
    *
    * The provided starting element is visited first.
    * If this isn't desired, send elem.parentNode to upwalk instead.
@@ -252,7 +237,7 @@ var
    * @param {function} callback Function to invoke with each parent.
    * Callback will be passed three parameters:
    *  - elem - The ancestor element,
-   *  - field - The string value of the data-field attribute (or undefined)
+   *  - field - The string value of the name/data-name attribute (or undefined)
    *  - opts - Object of options (always an object, may have no keys)
    * If the callback returns boolean false, no further ancestors will be visited.
    *
@@ -264,12 +249,11 @@ var
     
     while (elem !== null && elem.getAttribute) {
       
-      field = undefined;
-      if (elem.hasAttribute('data-field')) {
-        field = elem.getAttribute('data-field') || undefined;
-      } else if (elem.hasAttribute('name')) {
-        field = convertName(elem.getAttribute('name'));
-      }
+      field = convertName(
+        elem.hasAttribute('data-name') ? elem.getAttribute('data-name') :
+        elem.hasAttribute('name') ? elem.getAttribute('name') :
+        undefined
+      ) || undefined;
       
       if (field || elem.hasAttribute('data-opts')) {
         opts = options(elem, defaults);
@@ -288,7 +272,7 @@ var
   },
   
   /**
-   * Convert a simple name attribute string into a full field string.
+   * Convert a simple name attribute string into a full field string if it isn't already.
    * The simple name format is a hybrid of Apple's Key-Value Coding and PHP's array-based form variables.
    *
    * Examples:
@@ -306,6 +290,16 @@ var
    * @return {string} The full field string.
    */
   convertName = corridor.convertName = function(name) {
+    
+    // short-circuit if a falsey value was passed in
+    if (!name) {
+      return null;
+    }
+    
+    // check if this name value is already a field type
+    if ((/\$\$\$/).test(name)) {
+      return name;
+    }
     
     var field = "\ufff0";                    // start out with the target mark
     
