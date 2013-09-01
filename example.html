@@ -59,29 +59,29 @@
       <p>
         <label>
           homepage (will be omitted if empty):
-          <input type="text" name="homepage" data-opts='{"empty":"omit"}' value="https://npmjs.org/package/corridor" />
+          <input type="text" name="homepage" data-empty="omit" value="https://npmjs.org/package/corridor" />
         </label>
       </p>
     </fieldset>
-    <fieldset name='{"authors":$$$}' data-opts='{"role":"toggleable"}'>
+    <fieldset name='{"authors":$$$}' data-role="toggleable">
       <p>
         <label>
-          <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+          <input type="checkbox" data-role="toggle" checked/>
           include authors?
         </label>
       </p>
       <p>
         <label>
           first author:
-          <input type="text" name="[]" data-opts='{"empty":"omit"}' value="jimbojw" />
+          <input type="text" name="[]" data-empty="omit" value="jimbojw" />
         </label>
         <label>
           second author:
-          <input type="text" name="[]" data-opts='{"empty":"omit"}' />
+          <input type="text" name="[]" data-empty="omit" />
         </label>
         <label>
           third author:
-          <input type="text" name="[]" data-opts='{"empty":"omit"}' />
+          <input type="text" name="[]" data-empty="omit" />
         </label>
       </p>
     </fieldset>
@@ -95,28 +95,28 @@
       <p>
         <label>
           keywords (list format):
-          <textarea name="keywords" data-opts='{"type":"list"}'>foo bar</textarea>
+          <textarea name="keywords" data-type="list">foo bar</textarea>
         </label>
       </p>
     </fieldset>
-    <fieldset data-opts='{"role":"toggleable"}'>
+    <fieldset data-role="toggleable">
       <p>
         <label>
-          <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+          <input type="checkbox" data-role="toggle" checked/>
           include bin?
         </label>
       </p>
       <p>
         <label>
           bin (must be JSON):
-          <textarea name="bin" data-opts='{"type":"json"}'>{ "npm" : "./cli.js" }</textarea>
+          <textarea name="bin" data-type="json">{ "npm" : "./cli.js" }</textarea>
         </label>
       </p>
     </fieldset>
-    <fieldset data-opts='{"role":"toggleable"}'>
+    <fieldset data-role="toggleable">
       <p>
         <label>
-          <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+          <input type="checkbox" data-role="toggle" checked/>
           include dependencies?
         </label>
       </p>
