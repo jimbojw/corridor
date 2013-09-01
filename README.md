@@ -485,6 +485,18 @@ The `data-opts` attribute, when present, contains JSON that overrides the defaul
 #### name attribute
 
 corridor uses the `name` attribute of an element to figure out how the _value_ of that element relates to the _data_ representation.
+
+You can also use the `data-name` attribute instead.
+corridor will actually check the `data-name` attribute first and use it if present, falling back to plain `name`.
+This serves two purposes.
+
+First, strictly speaking, not all HTML5 elements allow the `name` attribute.
+But HTML5 doel allow `data-` prefixed attributes on any element.
+If you want to assign a name to a `p` or a `div` tag, for example, you should use `data-name`.
+
+Secondly, `data-name` supplies an alternative should your application require that the `name` field has a specific value.
+If you need to keep `name` the same, but want corridor to address it by a different name value, you'd use `data-name`.
+
 There are two formats you can use when specifying the name of an element: name format and field format.
 
 _Note: better names for "name format" and "field format" are forthcoming._
