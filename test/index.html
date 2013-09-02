@@ -21,7 +21,6 @@
         </script>
         
         <div>
-          
           <label>
             <span>name: </span>
             <input type="text" name="name" value="Bob" />
@@ -30,7 +29,6 @@
             <span>email: </span>
             <input type="text" name="email" value="bob@example.com" />
           </label>
-          
         </div>
         
       </div>
@@ -49,7 +47,6 @@
         </script>
         
         <div>
-          
           <fieldset name="record">
             <label>
               <span>name: </span>
@@ -60,7 +57,30 @@
               <input type="text" name="person.email" value="bob@example.com" />
             </label>
           </fieldset>
-          
+        </div>
+        
+      </div>
+      
+      <div id="type auto">
+        
+        <script type="application/json">
+          {
+            "string": "I'm a little teapot",
+            "boolean": false,
+            "number": 418,
+            "json": [
+              "short",
+              "and",
+              "stout"
+            ]
+          }
+        </script>
+        
+        <div>
+          <input type="text" name="string" value="I'm a little teapot" />
+          <input type="text" name="boolean" value="false" />
+          <input type="text" name="number" value="418" />
+          <input type="text" name="json" value='["short","and","stout"]' />
         </div>
         
       </div>
@@ -79,7 +99,6 @@
         </script>
         
         <div>
-          
           <label>
             <span>name: </span>
             <input type="text" name="name" />
@@ -88,7 +107,6 @@
             <span>email: </span>
             <input type="text" name="email" />
           </label>
-          
         </div>
         
       </div>
@@ -107,7 +125,6 @@
         </script>
         
         <div>
-          
           <fieldset name="record">
             <label>
               <span>name: </span>
@@ -118,7 +135,6 @@
               <input type="text" name="person.email" />
             </label>
           </fieldset>
-          
         </div>
         
       </div>
@@ -129,6 +145,8 @@
 <script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
 <script src="../src/corridor.js"></script>
 <script>
+// enable debug logging
+corridor.log = true;
 // setup shim for nodeunit tests
 window.require = function() { return corridor; }
 window.exports = {};
@@ -195,7 +213,7 @@ QUnit.test('integration — insert()', function() {
   
   var
     i, ii, test,
-    tests = document.getElementById('extract-tests').childNodes;
+    tests = document.getElementById('insert-tests').childNodes;
   
   for (i = 0, ii = tests.length; i < ii; i++) {
     if (tests[i].nodeType === 1) {
