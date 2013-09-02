@@ -333,7 +333,7 @@ var
         undefined
       ) || undefined;
       
-      if (field || elem.hasAttribute('data-opts')) {
+      if (field || hasOpts(elem)) {
         opts = options(elem, defaults);
         res = callback(elem, field, opts);
         if (res === false) {
@@ -347,6 +347,23 @@ var
     
     return true;
     
+  },
+  
+  /**
+   * Check whether a given element has any options directly specified.
+   * @param {HTMLElement} elem The element to inspect.
+   * @return {boolean} True if this element has any options specified.
+   */
+  hasOpts = corridor.hasOpts = function(elem) {
+    if (elem.hasAttribute('data-opts')) {
+      return true;
+    }
+    for (var k in defaults) {
+      if (elem.hasAttribute('data-' + k)) {
+        return true;
+      }
+    }
+    return false;
   },
   
   /**
