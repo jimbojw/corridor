@@ -1,6 +1,6 @@
 {
   "name": "corridor",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "JSON/HTML data corridor for data-binding",
   "repository": {
     "type": "git",
