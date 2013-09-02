@@ -7,11 +7,12 @@
 </head>
 <body>
   <div id="qunit"></div>
-  <div id="qunit-fixture">
+  <div id="qunit-fixture"></div>
+  <div id="corridor-fixture" style="display:none">
     
     <div id="extract-tests">
       
-      <div id="simple names">
+      <div class="test" id="simple names">
         
         <script type="application/json">
           {
@@ -33,7 +34,7 @@
         
       </div>
       
-      <div id="nested simple names">
+      <div class="test" id="nested simple names">
         
         <script type="application/json">
           {
@@ -61,7 +62,7 @@
         
       </div>
       
-      <div id="type auto">
+      <div class="test" id="type auto">
         
         <script type="application/json">
           {
@@ -85,7 +86,7 @@
         
       </div>
       
-      <div id="empty auto">
+      <div class="test" id="empty auto">
         
         <script type="application/json">
           {
@@ -109,11 +110,35 @@
         
       </div>
       
+      <div class="test" id="type list">
+        
+        <script type="application/json">
+          {
+            "spaces": ["wake", "me", "up"],
+            "commas": ["before you", "go go"],
+            "newlines": [
+              "I'm not planning",
+              "on going solo"
+            ]
+          }
+        </script>
+        
+        <div>
+          <textarea name="spaces" data-type="list">wake me up</textarea>
+          <textarea name="commas" data-type="list">before you, go go</textarea>
+          <textarea name="newlines" data-type="list">
+            I'm not planning
+            on going solo
+          </textarea>
+        </div>
+        
+      </div>
+      
     </div><!-- /extract tests -->
     
     <div id="insert-tests">
       
-      <div id="simple names">
+      <div class="test" id="simple names">
         
         <script type="application/json">
           {
@@ -135,7 +160,7 @@
         
       </div>
       
-      <div id="nested simple names">
+      <div class="test" id="nested simple names">
         
         <script type="application/json">
           {
@@ -165,17 +190,18 @@
       
     </div><!-- /insert-tests -->
     
-  </div>
+  </div><!-- /corridor-fixture -->
 <script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
 <script src="../src/corridor.js"></script>
 <script>
 // enable debug logging
 corridor.log = true;
 // setup shim for nodeunit tests
-window.require = function() { return corridor; }
+window.require = function() { return window.corridor; }
 window.exports = {};
 </script>
 <script src="test-available.js"></script>
+<script src="test-arrayify.js"></script>
 <script src="test-merge.js"></script>
 <script src="test-convertname.js"></script>
 <script>
@@ -201,60 +227,55 @@ window.exports = {};
     };
   
   for (var name in exports) {
-    (function(name, fn) {
+    (function(callback) {
       QUnit.asyncTest('unit — ' + name, function(test) {
-        return fn(ext({}, QUnit, shim, test));
+        return callback(ext({}, QUnit, shim, test));
       });
-    })(name, exports[name]);
+    })(exports[name]);
   }
 
-})(exports);
+})(window.exports);
 </script>
 <script>
 // run integration tests
 QUnit.test('integration — extract()', function() {
   
-  var
-    i, ii, test,
-    tests = document.getElementById('extract-tests').childNodes;
-  
-  for (i = 0, ii = tests.length; i < ii; i++) {
-    if (tests[i].nodeType === 1) {
-      (function(script, root) {
+  corridor
+    .arrayify(document.querySelectorAll('#extract-tests .test'))
+    .forEach(function(test) {
+      
+      var
+        script = test.querySelector('script'),
+        root = test.querySelector('div'),
+        actual = corridor(root),
+        expected = JSON.parse(script.textContent || script.innerText || script.innerHTML);
         
-        var
-          actual = corridor(root),
-          expected = JSON.parse(script.textContent);
-          
-        QUnit.deepEqual(actual, expected, this.id);
-        
-      }).apply(tests[i], tests[i].getElementsByTagName('*'));
-    }
-  }
+      QUnit.deepEqual(actual, expected, test.id);
+      
+    });
   
 });
 QUnit.test('integration — insert()', function() {
   
-  var
-    i, ii, test,
-    tests = document.getElementById('insert-tests').childNodes;
-  
-  for (i = 0, ii = tests.length; i < ii; i++) {
-    if (tests[i].nodeType === 1) {
-      (function(script, root) {
-        
-        var original = JSON.parse(script.textContent);
-        
-        // insert data with corridor
-        corridor(root, original);
-        
-        var actual = corridor(root);
-        
-        QUnit.deepEqual(actual, original, this.id);
-        
-      }).apply(tests[i], tests[i].getElementsByTagName('*'));
-    }
-  }
+  corridor
+    .arrayify(document.querySelectorAll('#insert-tests .test'))
+    .forEach(function(test) {
+      
+      var 
+        script = test.querySelector('script'),
+        root = test.querySelector('div'),
+        original = JSON.parse(script.textContent || script.innerText || script.innerHTML),
+        actual;
+      
+      // insert data with corridor
+      corridor(root, original);
+      
+      // extract it back out again
+      actual = corridor(root);
+      
+      QUnit.deepEqual(actual, original, test.id);
+      
+    });
   
 });
 </script>
