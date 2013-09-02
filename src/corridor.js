@@ -542,13 +542,14 @@ var
       return [];
     }
     opts = opts || {};
+    text = text.replace(/^\s+|\s+$/g, '');
     var sep =
       opts.separator ? opts.separator :      // prefer specified separator
       text.indexOf("\n") !== -1 ? /\r?\n/ :  // use line breaks if there are any
       text.indexOf(",") !== -1 ? ',' :       // or use commas if there are any
       /\s+/;                                 // last resort - any whitespace
     if (!('trim' in opts) || opts.trim) {
-      return text.split(sep).map(function(part) {
+      return arrayify(text.split(sep)).map(function(part) {
         return part.replace(/^\s+|\s+$/g, '');
       });
     }
@@ -586,7 +587,7 @@ var
       
       // find all the candidate "toggle" elements.
       // to be a candidate, the descendent's nearest parent "toggleable" must be elem.
-      candidates = slice.call(elem.querySelectorAll('[data-role], [data-opts]'))
+      candidates = arrayify(elem.querySelectorAll('[data-role], [data-opts]'))
         .filter(function(child){
           if (options(child).role !== 'toggle') {
             return false;
