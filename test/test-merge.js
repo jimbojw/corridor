@@ -1,12 +1,13 @@
 /**
  * test-merge.js - tests the merge() function.
  */
-
-var corridor = require('../src/corridor.js');
-
 exports['corridor.merge()'] = function(test) {
   
-  var suite = [{
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
       obj: ['a'],
       other: ['b'],
       expected: ['a', 'b'],
@@ -36,8 +37,7 @@ exports['corridor.merge()'] = function(test) {
       other: { b: 'hi' },
       expected: { a: 'whut', b: 'hi' },
       reason: 'missing keys should be added to non-empty objects'
-    }
-  ];
+    }];
   
   test.expect(suite.length);
   

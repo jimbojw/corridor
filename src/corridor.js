@@ -375,19 +375,22 @@ var
       return name;
     }
     
-    var field = "\ufff0";                    // start out with the target mark
-    
-    name
+    var
+      
+      field = "\ufff0",                      // start out with the target mark
+      
+      parts = name
       .replace(/^\s+|\s+$/g, '')             // trim whitespace for courtesy
       .replace(/\[\s+]/g, '[]')              // trim inside bracket vars
       .replace(/\[([^\]]+)]/g, '.$1')        // convert bracket vars to dot vars
-      .match(/[^[\].]+|\[\]/g)               // grab list of component parts
-      .forEach(function(p) {
-        p = p.replace(/^\s+|\s+$/g, '');     // trim each part
-        field = field.replace("\ufff0",      // add part to field specification
-          p === '[]' ? "[\ufff0]" : "{" + JSON.stringify(p || 'undefined') + ":\ufff0}"
-        );
-      });
+      .match(/[^[\].]+|\[\]/g);              // grab list of component parts
+    
+    arrayify(parts).forEach(function(p) {
+      p = p.replace(/^\s+|\s+$/g, '');       // trim each part
+      field = field.replace("\ufff0",        // add part to field specification
+        p === '[]' ? "[\ufff0]" : "{" + JSON.stringify(p || 'undefined') + ":\ufff0}"
+      );
+    });
     
     return field.replace("\ufff0", '$$$$$$');
     
@@ -702,21 +705,21 @@ var
    */
   merge = corridor.merge = function(obj, other) {
     
-    var key;
+    var i, ii, key;
     
     if (toString.call(other) === '[object Array]') {
       if (toString.call(obj) === '[object Array]') {
-        other.forEach(function(item){
-          obj.push(item);
-        });
+        for (i = 0, ii = other.length; i < ii; i++) {
+          obj.push(other[i]);
+        }
       } else {
-        other.forEach(function(item, index) {
-          if (index in obj && typeof obj[index] === 'object' && obj[index] !== null) {
-            merge(obj[index], item);
+        for (i = 0, ii = other.length; i < ii; i++) {
+          if (i in obj && typeof obj[i] === 'object' && obj[i] !== null) {
+            merge(obj[i], other[i]);
           } else {
-            obj[index] = item;
+            obj[i] = other[i];
           }
-        });
+        }
       }
     } else {
       for (key in other) {

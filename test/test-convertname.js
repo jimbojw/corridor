@@ -1,12 +1,13 @@
 /**
  * test-convertname.js - tests the convertName() function.
  */
-
-var corridor = require('../src/corridor.js');
-
 exports['corridor.convertName()'] = function(test) {
   
-  var suite = [{
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
       name: 'name',
       field: '{"name":$$$}',
       reason: 'basic name should become property field'
@@ -74,8 +75,7 @@ exports['corridor.convertName()'] = function(test) {
       name: '[$$$]',
       field: '[$$$]',
       reason: 'presence of $$$ anywhere should indicate field format'
-    }
-  ];
+    }];
   
   test.expect(suite.length);
   

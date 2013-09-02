@@ -1,10 +1,9 @@
 /**
  * test-available.js - basic availability test.
  */
-
-var corridor = require('../src/corridor.js');
-
 exports['basic availability'] = function(test) {
+  
+  var corridor = require('../src/corridor.js');
   
   test.expect(2);
   test.ok(corridor, 'corridor exists');
@@ -12,3 +11,4 @@ exports['basic availability'] = function(test) {
   test.done();
   
 };
+
