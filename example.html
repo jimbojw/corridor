@@ -19,7 +19,7 @@
     Builds a package.json file.
   </p>
   <hr />
-  <div class="output">
+  <div id="output">
     <h2>package.json</h2>
     <p>
       The generated package.json file appears here.
@@ -32,12 +32,12 @@
   <div class="actions">
     <h2>corridor actions</h2>
     <p>
-      <button class="extract">&uArr; extract data &uArr;</button>
-      <button class="insert">&dArr; insert data &dArr;</button>
+      <button id="extract">&uArr; extract data &uArr;</button>
+      <button id="insert">&dArr; insert data &dArr;</button>
     </p>
   </div>
   <hr />
-  <div class="input">
+  <div id="input">
     <fieldset>
       <h2>important fields</h2>
       <p>
@@ -148,17 +148,17 @@
 var
   
   // relevant elements
-  input = document.querySelector('.input'),
-  output = document.querySelector('.output textarea');
+  input = document.getElementById('input'),
+  output = document.getElementById('output').getElementsByTagName('textarea')[0];
 
 // extract button should send data to textarea
-document.querySelector('.extract').addEventListener('click', function(e) {
+document.getElementById('extract').onclick = function(e) {
   output.value = JSON.stringify(corridor(input), null, '  ');
-}, false);
+};
 
-document.querySelector('.insert').addEventListener('click', function(e) {
+document.getElementById('insert').onclick = function(e) {
   corridor(input, JSON.parse(output.value));
-}, false);
+};
 
 corridor.log = true;
 
