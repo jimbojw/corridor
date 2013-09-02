@@ -45,6 +45,71 @@ var
   },
   
   /**
+   * Convert an array-like object into a real, usable array (for IE8).
+   * @param {mixed} obj An array-like object.
+   * @return {array} A real array.
+   */
+  arrayify = corridor.arrayify = function(obj) {
+    if (toString.call(obj) !== '[object Array]') {
+      try {
+        obj = slice.call(obj);
+      } catch (err) {
+        obj = arrayify(new Array(obj.length)).map(function(item, i) {
+          return obj[i];
+        });
+      }
+    }
+    for (var k in arrayify) {
+      if (!(k in obj)) {
+        obj[k] = arrayify[k];
+      }
+    }
+    return obj;
+  },
+  
+  /**
+   * Actual map, or shim implementation if necessary (for IE8).
+   * @param {function} callback Function to invoke for each element of this array.
+   * @param {mixed} self Object to use for this when executing callback.
+   * @return {array} Collected results of running the callback on each element.
+   */
+  map = corridor.arrayify.map = Array.prototype.map || function(callback, self) {
+    var i, ii, ret = [];
+    for (i = 0, ii = this.length; i < ii; i++) {
+      if (i in this) {
+        ret[i] = callback.call(self, this[i], i, this);
+      }
+    }
+    return arrayify(ret);
+  },
+  
+  /**
+   * Actual forEach, or shim implementation if necessary (for IE8).
+   * @param {function} callback Function to invoke for each element of this array.
+   * @param {mixed} self Object to use for this when executing callback.
+   */
+  forEach = corridor.arrayify.forEach = Array.prototype.forEach || map,
+  
+  /**
+   * Actual filter, or shim implementation if necessary (for IE8).
+   * @param {function} callback Function to invoke for each element of this array.
+   * @param {mixed} self Object to use for this when executing callback.
+   * @return {array} Subset of elements from original array where callback returned a truthy value.
+   */
+  filter = corridor.arrayify.filter = Array.prototype.filter || function(callback, self) {
+    var i, ii, ret = [], item;
+    for (i = 0, ii = this.length; i < ii; i++) {
+      if (i in this) {
+        item = this[i];
+        if (callback.call(self, item, i, this)) {
+          ret.push(item);
+        }
+      }
+    }
+    return arrayify(ret);
+  },
+  
+  /**
    * Extract data from DOM values under the specified element.
    * @param {HTMLElement} root The root element to scan for data.
    * @param {object} opts Hash of options (optional, see corridor options)
@@ -231,7 +296,7 @@ var
    * @param {HTMLElement} root The root element to search for fields.
    */
   selectFields = corridor.selectFields = function(root, opts) {
-    return slice.call(root.querySelectorAll('[name], [data-name]'));
+    return arrayify(root.querySelectorAll('[name], [data-name]'));
   },
   
   /**
