@@ -142,7 +142,7 @@ var
       
       // build out full contribution
       contrib = buildup("\ufff0", elem, root);
-      field = contrib.replace("\ufff0", '$$$$$$');
+      field = contrib.split("\ufff0").join('$$$');
       
       // short-circuit if this field should be omitted
       if (!value && !includeEmpty(field, elem, opts)) {
@@ -392,7 +392,7 @@ var
       );
     });
     
-    return field.replace("\ufff0", '$$$$$$');
+    return field.split("\ufff0").join('$$$');
     
   },
   
