@@ -85,6 +85,30 @@
         
       </div>
       
+      <div id="empty auto">
+        
+        <script type="application/json">
+          {
+            "keep": [
+              "every heartbeat",
+              "",
+              "bears your name",
+              ""
+            ]
+          }
+        </script>
+        
+        <div>
+          <input type="text" name="keep[]" value="every heartbeat" />
+          <input type="text" name="keep[]" data-empty="include" value="" />
+          <input type="text" name="keep[]" value="bears your name" />
+          <input type="text" name="keep[]" value="" required />
+          <input type="text" name="loud and clear[]" value="" />
+          <input type="text" name="they stake my claim" data-empty="omit" value="" />
+        </div>
+        
+      </div>
+      
     </div><!-- /extract tests -->
     
     <div id="insert-tests">
