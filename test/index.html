@@ -7,7 +7,8 @@
 </head>
 <body>
   <div id="qunit"></div>
-  <div id="qunit-fixture">
+  <div id="qunit-fixture"></div>
+  <div id="corridor-fixture" style="display:none">
     
     <div id="extract-tests">
       
@@ -165,7 +166,7 @@
       
     </div><!-- /insert-tests -->
     
-  </div>
+  </div><!-- /corridor-fixture -->
 <script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
 <script src="../src/corridor.js"></script>
 <script>
@@ -219,7 +220,7 @@ QUnit.test('quinit availability', function(test) {
 </script>
 <script>
 // run integration tests
-false && QUnit.test('integration — extract()', function() {
+QUnit.test('integration — extract()', function() {
   
   var tests = document.getElementById('extract-tests').childNodes;
   
@@ -241,7 +242,7 @@ false && QUnit.test('integration — extract()', function() {
   }
   
 });
-false && QUnit.test('integration — insert()', function() {
+QUnit.test('integration — insert()', function() {
   
   var tests = document.getElementById('insert-tests').childNodes;
   
