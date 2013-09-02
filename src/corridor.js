@@ -71,17 +71,24 @@ var
     
       var
         opts = options(elem, settings),
-        value = val(elem);
+        value = val(elem),
+        contrib,
+        field;
       
-      if (opts.empty === 'omit' && !value) {
+      // build out full contribution
+      contrib = buildup("\ufff0", elem, root);
+      field = contrib.replace("\ufff0", '$$$$$$');
+      
+      // short-circuit if this field should be omitted
+      if (!value && !includeEmpty(field, elem, opts)) {
         return;
       }
       
       // create type-specific value string
       value = JSON.stringify(coerce(value, opts.type, opts));
       
-      // build out full contribution
-      value = buildup(value, elem, root);
+      // inject value into contribution
+      value = contrib.replace("\ufff0", value);
       
       // merge contribution into the result data
       merge(data, JSON.parse(value));
@@ -185,10 +192,11 @@ var
     /**
      * If the field has a falsey value, this option determines whether it still contributes to the output.
      * Recognized choices are:
-     *  - include - include the value in the output (default)
+     *  - auto - detect the best choice based on the element (default)
+     *  - include - include the value in the output
      *  - omit - do not add the field at all
      */
-    empty: "include",
+    empty: "auto",
     
     /**
      * The role that this element plays in corridor operations.
@@ -317,6 +325,25 @@ var
       });
     
     return field.replace("\ufff0", '$$$$$$');
+    
+  },
+  
+  /**
+   * Decide whether the element's value should contribute to output if empty.
+   * @param {string} field The full field format specification for this element.
+   * @param {HTMLElement} elem The element to decide for.
+   * @param {object} opts Options to use to decide.
+   * @return {boolean} Only true if an empty value should be included.
+   */
+  includeEmpty = corridor.includeEmpty = function(field, elem, opts) {
+    return (
+      opts.empty === 'include' ? true :
+      opts.empty === 'omit' ? false :
+      elem.hasAttribute('required') ? true :
+      field.indexOf('[$$$]') !== -1 ? false :
+      elem.type === 'checkbox' ? false :
+      true
+    );
     
   },
   

@@ -270,11 +270,11 @@ The HTML for that might look like this:
   </label>
   <label>
     second author:
-    <input type="text" name="authors[]" data-empty="omit" />
+    <input type="text" name="authors[]" />
   </label>
   <label>
     third author:
-    <input type="text" name="authors[]" data-empty="omit" />
+    <input type="text" name="authors[]" />
   </label>
 </fieldset>
 ```
@@ -293,8 +293,12 @@ Running corridor on the above would give you JSON like this:
 ```
 
 Notice that there's only one element in this array.
-That's due to the `empty:omit` option on each of the other inputs.
-By default, corridor will include empty values in the output JSON it produces, but you can disable this feature by setting `empty` to `omit`.
+By default, corridor makes an intelligent decision about wether to include empty values in the extracted data.
+See the API documentation for how exactly it decides.
+
+You can override the decision algorithm by specifying a `data-empty` attribute.
+If you set empty to `include`, then the element's value will be included even if it's empty.
+If you set empty to `omit`, then it'll be left out of the data representation if empty.
 
 Just like with the `dependencies.foo` case from last section, here we could split up the parts of the name between the fieldset and the inputs.
 E.g.
@@ -459,18 +463,54 @@ For example, the `enabledOnly` property controls whether corridor will operate o
 By default `enabledOnly` is set to `true`, meaning only enabled fields are included.
 You could set `enabledOnly` to `false` in the opts hash to tell corridor to ignore the effects of toggleables.
 
-Options that apply to any field are:
+Options that apply to any field are `type` and `empty`.
+The `role` and `enabledOnly` options apply only to toggleable/toggle functionality.
 
- * **type** — The kind of field this is. Choices are:
-  - _auto_ - automatically detect the correct type based on the value (default)
-  - _string_ - treat the value as a string
-  - _boolean_ - coerce this value to something true/false
-  - _number_ - parse this value as a number
-  - _json_ - leave this value as-is (will choke if it's not actually valid JSON)
-  - _list_ - parse this value as a list of values
- * **empty** — If a field has a falsey value, this option determines whether it still contributes to the output. Choices are:
-  - _include_ - include the value in the output (default)
-  - _omit_ - do not add the field at all
+Note that setting options via the `opts` param specifically affects the execution of the corridor function just once.
+Persistent options should be stored in the HTML.
+
+##### type option
+
+The `type` option indicates the kind of field this is.
+The type determines how corridor converts the string value of the form element into the data representation.
+
+The recognized types are:
+
+ * _auto_ - automatically detect the correct type based on the value (default)
+ * _string_ - treat the value as a string
+ * _boolean_ - coerce this value to something true/false
+ * _number_ - parse this value as a number
+ * _json_ - leave this value as-is (will choke if it's not actually valid JSON)
+ * _list_ - parse this value as a list of values
+
+When automatically detecting the type, corridor uses the following algorithm:
+
+ 1. attempt to parse the value as JSON, if successful, use this value
+  - _Note: this covers booleans and numbers as well as richer JSON structures._
+ 2. otherwise treat the value as a string.
+
+The list type will never be auto detected.
+
+##### empty option
+
+The `empty` option indicates whether the value should be included in the output if its value is empty.
+
+Choices are:
+
+ * _auto_ - automatically detect the appropriate behavior based on the circumstances (default)
+ * _include_ - include the value in the output (default)
+ * _omit_ - do not add the field at all
+
+When empty is set to `auto`, corridor uses the following algorithm to between `include` and `omit`:
+
+ * if the element has a `required` attribute, then choose `include`, otherwise,
+ * if the element would contribute a value by appending to an array (ex: `name="authors[]"`), choose `omit`, otherwise,
+ * if the element is a checkbox, choose `omit`.
+
+If none of these conditions are met, then choose `include`.
+With this algorithim, most of the time an empty value will contribute to the output, except in cases where you probably expect it wouldn't.
+
+##### toggle options
 
 Options specific to the `toggleable`/`toggle` functionality are:
 
@@ -479,9 +519,6 @@ Options specific to the `toggleable`/`toggle` functionality are:
   - _toggleable_ - this element contains fields and may be toggled on or off
   - _toggle_ - this element is a checkbox which toggles its nearest parent toggleable
  * **enabledOnly** — (boolean) When inserting/extracting, only operate on enabled fields (default: true).
-
-Keep in mind that setting options via the `opts` param specifically affects the execution of the corridor function once.
-Persistent options should be stored in the HTML.
 
 ### HTML API
 
