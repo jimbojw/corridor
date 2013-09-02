@@ -79,10 +79,12 @@ exports['corridor.convertName()'] = function(test) {
   
   test.expect(suite.length);
   
-  suite.forEach(function(data) {
-    var actual = corridor.convertName(data.name);
-    test.deepEqual(actual, data.field, data.reason);
-  });
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.convertName(data.name);
+      test.deepEqual(actual, data.field, data.reason);
+    })(suite[i]);
+  }
   
   test.done();
   

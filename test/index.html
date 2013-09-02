@@ -214,45 +214,50 @@ window.exports = {};
 // run integration tests
 QUnit.test('integration — extract()', function() {
   
-  var
-    i, ii, test,
-    tests = document.getElementById('extract-tests').childNodes;
+  var tests = document.getElementById('extract-tests').childNodes;
   
-  for (i = 0, ii = tests.length; i < ii; i++) {
+  for (var i = 0, ii = tests.length; i < ii; i++) {
     if (tests[i].nodeType === 1) {
-      (function(script, root) {
+      (function(test) {
         
-        var
+        var 
+          elems = test.getElementsByTagName('*'),
+          script = elems[0],
+          root = elems[1],
           actual = corridor(root),
-          expected = JSON.parse(script.textContent);
+          expected = JSON.parse(script.textContent || script.innerText);
           
-        QUnit.deepEqual(actual, expected, this.id);
+        QUnit.deepEqual(actual, expected, test.id);
         
-      }).apply(tests[i], tests[i].getElementsByTagName('*'));
+      })(tests[i]);
     }
   }
   
 });
 QUnit.test('integration — insert()', function() {
   
-  var
-    i, ii, test,
-    tests = document.getElementById('insert-tests').childNodes;
+  var tests = document.getElementById('insert-tests').childNodes;
   
-  for (i = 0, ii = tests.length; i < ii; i++) {
+  for (var i = 0, ii = tests.length; i < ii; i++) {
     if (tests[i].nodeType === 1) {
-      (function(script, root) {
+      (function(test) {
         
-        var original = JSON.parse(script.textContent);
+        var 
+          elems = test.getElementsByTagName('*'),
+          script = elems[0],
+          root = elems[1],
+          original = JSON.parse(script.textContent || script.innerText),
+          actual;
         
         // insert data with corridor
         corridor(root, original);
         
-        var actual = corridor(root);
+        // extract it back out again
+        actual = corridor(root);
         
-        QUnit.deepEqual(actual, original, this.id);
+        QUnit.deepEqual(actual, original, test.id);
         
-      }).apply(tests[i], tests[i].getElementsByTagName('*'));
+      })(tests[i]);
     }
   }
   

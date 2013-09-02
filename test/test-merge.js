@@ -41,10 +41,12 @@ exports['corridor.merge()'] = function(test) {
   
   test.expect(suite.length);
   
-  suite.forEach(function(data) {
-    var actual = corridor.merge(data.obj, data.other);
-    test.deepEqual(actual, data.expected, data.reason);
-  });
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other);
+      test.deepEqual(actual, data.expected, data.reason);
+    })(suite[i]);
+  }
   
   test.done();
   
