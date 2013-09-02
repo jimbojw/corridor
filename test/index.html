@@ -134,6 +134,54 @@
         
       </div>
       
+      <div class="test" id="toggleable">
+        
+        <script type="application/json">
+          {
+            "opts-opts-checked": "work it harder",
+            "opts-role-checked": "do it faster",
+            "role-opts-checked": "more than ever",
+            "role-role-checked": "our work is"
+          }
+        </script>
+        
+        <div>
+          <div data-opts='{"role":"toggleable"}'>
+            <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+            <input type="text" name="opts-opts-checked" value="work it harder" />
+          </div>
+          <div data-opts='{"role":"toggleable"}'>
+            <input type="checkbox" data-opts='{"role":"toggle"}' />
+            <input type="text" name="opts-opts-unchecked" value="make it better" />
+          </div>
+          <div data-opts='{"role":"toggleable"}'>
+            <input type="checkbox" data-role="toggle" checked/>
+            <input type="text" name="opts-role-checked" value="do it faster" />
+          </div>
+          <div data-opts='{"role":"toggleable"}'>
+            <input type="checkbox" data-role="toggle" />
+            <input type="text" name="opts-role-unchecked" value="makes us stronger" />
+          </div>
+          <div data-role="toggleable">
+            <input type="checkbox" data-opts='{"role":"toggle"}' checked/>
+            <input type="text" name="role-opts-checked" value="more than ever" />
+          </div>
+          <div data-role="toggleable">
+            <input type="checkbox" data-opts='{"role":"toggle"}' />
+            <input type="text" name="role-opts-unchecked" value="hour after" />
+          </div>
+          <div data-role="toggleable">
+            <input type="checkbox" data-role="toggle" checked/>
+            <input type="text" name="role-role-checked" value="our work is" />
+          </div>
+          <div data-role="toggleable">
+            <input type="checkbox" data-role="toggle" />
+            <input type="text" name="role-role-unchecked" value="never over" />
+          </div>
+        </div>
+        
+      </div>
+      
     </div><!-- /extract tests -->
     
     <div id="insert-tests">
