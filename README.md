@@ -131,11 +131,8 @@ If you don't provide one, corridor will assume you meant to search down from the
 
 ### corridor data types
 
-By default, corridor will assume that the value provided by a field is a string.
-However, you can override this by specifiying a type.
-
-To give options to corridor for a particular HTML element, you can specify them with `data-*` attributes.
-The `data-type` attribute tells corridor how to interpret the value of the element.
+By default, corridor will automatically detect the type of the value for an element.
+But you can override this behavior by providing a `data-type` attribute.
 
 Let's see how this applies to the `keywords` field of a package.json.
 
@@ -166,7 +163,8 @@ JSON.stringify(corridor(), null, 2);
 
 Supported data types include:
 
- * string - default, just treats value as a string.
+ * auto - default, automatically detects the type.
+ * string - just treats value as a string.
  * boolean - always true or false.
  * number - parses string as a float.
  * list - parses value as a list.
@@ -453,7 +451,7 @@ corridor(null, null, {type:'binary'});
 ```
 
 This means that any fields without an explicit `type` declared will be coerced to binary values.
-Fields with an explicit type (either as `data-type` or in `data-opts`) will stilly use their specified type though.
+Fields with an explicit type (either as `data-type` or in `data-opts`) will still use their specified type though.
 
 Secondly, some options give hints to corridor's higher level behavior.
 
@@ -464,7 +462,8 @@ You could set `enabledOnly` to `false` in the opts hash to tell corridor to igno
 Options that apply to any field are:
 
  * **type** — The kind of field this is. Choices are:
-  - _string_ - treate the value as a string (default)
+  - _auto_ - automatically detect the correct type based on the value (default)
+  - _string_ - treat the value as a string
   - _boolean_ - coerce this value to something true/false
   - _number_ - parse this value as a number
   - _json_ - leave this value as-is (will choke if it's not actually valid JSON)

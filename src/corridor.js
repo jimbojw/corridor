@@ -202,13 +202,14 @@ var
     /**
      * The kind of field this is.
      * Recognized choices are:
+     *  - auto - detect the best fit from among the other options (default)
      *  - string - treate the value as a string (default)
-     *  - boolean - coerce this value to something true/false
+     *  - boolean - turn this value into something true/false
      *  - number - parse this value as a number
      *  - json - leave this value as-is (will choke if it's not actually valid JSON)
      *  - list - parse this value as a list of values
      */
-    type: "string",
+    type: "auto",
     
     /**
      * When inserting/extracting, only operate on enabled fields (default: true).
@@ -411,6 +412,13 @@ var
    * @return {mixed} A coerced value.
    */
   coerce = corridor.coerce = function(value, type, opts) {
+    if (type === 'auto') {
+      try {
+        return JSON.parse(value);
+      } catch (err) {
+        return value + '';
+      }
+    }
     return (
       type === 'boolean' ? !!value :
       type === 'number' ? parseFloat(value) :
