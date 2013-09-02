@@ -62,6 +62,7 @@ var
         })([], obj.length);
       }
     }
+    // add shim methods
     for (var k in arrayify) {
       if (!(k in obj)) {
         obj[k] = arrayify[k];

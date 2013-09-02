@@ -177,15 +177,9 @@ window.require = function() { return window.corridor; }
 window.exports = {};
 </script>
 <script src="test-available.js"></script>
+<script src="test-arrayify.js"></script>
 <script src="test-merge.js"></script>
 <script src="test-convertname.js"></script>
-<script>
-// side effect: this test makes ie8 work (for reasons unknown)
-// remove it at your own peril
-QUnit.test('quinit availability', function(test) {
-  QUnit.ok(QUnit, 'yep, QUnit seems to be working fine');
-});
-</script>
 <script>
 // run unit tests
 (function(exports){
