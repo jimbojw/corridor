@@ -1,7 +1,7 @@
 {
   "name": "corridor",
-  "version": "0.2.0",
-  "description": "JSON/DOM data corridor for data-binding",
+  "version": "0.3.0",
+  "description": "JSON/HTML data corridor for data-binding",
   "repository": {
     "type": "git",
     "url": "git@github.com:jimbojw/corridor.git"
