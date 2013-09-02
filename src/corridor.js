@@ -54,9 +54,12 @@ var
       try {
         obj = slice.call(obj);
       } catch (err) {
-        obj = arrayify(new Array(obj.length)).map(function(item, i) {
-          return obj[i];
-        });
+        obj = (function(ret, i) {
+          while (i--) {
+            ret[i] = obj[i];
+          }
+          return ret;
+        })([], obj.length);
       }
     }
     for (var k in arrayify) {
@@ -120,20 +123,20 @@ var
     
     // fail fast if there's no root element to use
     if (!root) {
-      throw Error('corridor requires a queryable root element to insert data into');
+      throw Error('corridor requires a queryable root element to insert extract data from');
     }
     
     var
       settings = extend({}, defaults, opts),
       data = {},
       fields = selectFields(root, settings).filter(hasVal);
-      
+    
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
     }
       
-    fields.forEach(function(elem) { 
-    
+    fields.forEach(function(elem) {
+      
       var
         opts = options(elem, settings),
         value = val(elem),
