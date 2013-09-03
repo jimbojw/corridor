@@ -431,8 +431,8 @@ Examples:
 ```js
 corridor(null, data);
 corridor(root, data);
-corridor(null, data, options);
-corridor(root, data, options);
+corridor(null, data, opts);
+corridor(root, data, opts);
 ```
 
 In _insert mode_, corridor will:
