@@ -291,7 +291,16 @@ var
     /**
      * When inserting/extracting, only operate on enabled fields (default: true).
      */
-    enabledOnly: true
+    enabledOnly: true,
+    
+    /**
+     * Strategy to employ when merging two objects.
+     * Recognized choices are:
+     *  - auto - intelligently merge the objects (default)
+     *  - concat - always concatenate arrays
+     *  - extend - iterate through items and merge them
+     */
+    merge: 'auto'
     
   },
   
@@ -733,17 +742,39 @@ var
    */
   merge = corridor.merge = function(obj, other, opts) {
     
-    var i, ii, key;
+    var i, ii, key, strategy = defaults.merge;
+    
+    if (opts && 'merge' in opts) {
+      strategy = opts.merge;
+    }
     
     if (toString.call(other) === '[object Array]') {
       if (toString.call(obj) === '[object Array]') {
-        for (i = 0, ii = other.length; i < ii; i++) {
-          obj.push(other[i]);
+        if (strategy === 'concat') {
+          for (i = 0, ii = other.length; i < ii; i++) {
+            obj.push(other[i]);
+          }
+        } else if (strategy === 'extend') {
+          for (i = 0, ii = other.length; i < ii; i++) {
+            merge(obj[i], other[i], opts);
+          }
+        } else {
+          if (!obj.length || other.length > 1) {
+            for (i = 0, ii = other.length; i < ii; i++) {
+              obj.push(other[i]);
+            }
+          } else {
+            if (safely(obj[obj.length - 1], other[0])) {
+              merge(obj[obj.length - 1], other[0], opts);
+            } else {
+              obj.push(other[0]);
+            }
+          }
         }
       } else {
         for (i = 0, ii = other.length; i < ii; i++) {
           if (i in obj && typeof obj[i] === 'object' && obj[i] !== null) {
-            merge(obj[i], other[i]);
+            merge(obj[i], other[i], opts);
           } else {
             obj[i] = other[i];
           }
@@ -752,7 +783,7 @@ var
     } else {
       for (key in other) {
         if (key in obj && typeof obj[key] === 'object' && obj[key] !== null) {
-          merge(obj[key], other[key]);
+          merge(obj[key], other[key], opts);
         } else {
           obj[key] = other[key];
         }
