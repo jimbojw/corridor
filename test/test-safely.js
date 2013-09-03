@@ -8,6 +8,21 @@ exports['corridor.safely()'] = function(test) {
     corridor = require('../src/corridor.js'),
     
     suite = [{
+      obj: 'hi',
+      other: 'there',
+      expected: false,
+      reason: 'two primitive values can never merge safely'
+    },{
+      obj: ['hi'],
+      other: 'there',
+      expected: false,
+      reason: 'primitive values can never merge safely into arrays'
+    },{
+      obj: 'hi',
+      other: ['there'],
+      expected: false,
+      reason: 'arrays cannot safely merge into primitives'
+    },{
       obj: { a: 'hi' },
       other: { a: 'there' },
       expected: false,

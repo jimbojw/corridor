@@ -17,6 +17,16 @@ exports['corridor.merge(objects)'] = function(test) {
       other: { b: 'hi' },
       expected: { a: 'whut', b: 'hi' },
       reason: 'missing keys should be added to non-empty objects'
+    },{
+      obj: { "person": { "name": "Bob" } },
+      other: { "person": { "email": "bob@company.com" } },
+      expected: { "person": { "name": "Bob", "email": "bob@company.com" } },
+      reason: 'nested objects should safely merge'
+    },{
+      obj: { "person": { "name": "Bob" } },
+      other: { "person": { "name": "Alice" } },
+      expected: { "person": { "name": "Alice" } },
+      reason: 'nested conflicting objects should have their keys take precidence'
     }];
   
   test.expect(suite.length);
