@@ -88,3 +88,60 @@ exports['corridor.merge(arrays)'] = function(test) {
   
 };
 
+exports['corridor.merge(concat)'] = function(test) {
+  
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
+      obj: [{a: 'hi'}],
+      other: [{b: 'there'}],
+      expected: [{a: 'hi'}, {b: 'there'}],
+      reason: 'arrays of non-conflicting objects should concatenate in concat mode'
+    }];
+  
+  test.expect(suite.length);
+  
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other, {merge:'concat'});
+      test.deepEqual(actual, data.expected, data.reason);
+    })(suite[i]);
+  }
+  
+  test.done();
+  
+};
+
+exports['corridor.merge(extend)'] = function(test) {
+  
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
+      obj: [{a: 'hi'}],
+      other: [{b: 'there'}],
+      expected: [{a: 'hi', b: 'there'}],
+      reason: 'arrays of non-conflicting objects should concatenate in extend mode'
+    },{
+      obj: [{a: 'hi'}, {b: 'sneak attack!'}],
+      other: [{b: 'there'}],
+      expected: [{a: 'hi', b: 'there'}, {b: 'sneak attack!'}],
+      reason: 'arrays of objects should merge in extend mode'
+    }];
+  
+  test.expect(suite.length);
+  
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other, {merge:'extend'});
+      test.deepEqual(actual, data.expected, data.reason);
+    })(suite[i]);
+  }
+  
+  test.done();
+  
+};
+
