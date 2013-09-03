@@ -342,7 +342,7 @@ For example, say you wanted a checkbox to control whether `keywords` were going 
 The HTML for that might look like this:
 
 ```html
-<fieldset data-role="role">
+<fieldset data-role="toggleable">
   <p>
     <label>
       <input type="checkbox" data-role="toggle" checked/>
