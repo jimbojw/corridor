@@ -718,14 +718,20 @@ var
   },
   
   /**
-   * Deep merge two plain object heirarchies.
-   * Does not check for hasOwnProperty.
-   * Does not deal with cyclical references (at all).
-   * Concatenates arrays (rather than trying to merge their elements).
-   * Doesn't guarantee that new cyclical relationships won't be created.
-   * Doesn't guarantee good behavior when asymentrical types are encountered.
+   * Deep merge one object into another.
+   *
+   * Notes:
+   *  - does not check for hasOwnProperty.
+   *  - does not deal with cyclical references (at all).
+   *  - concatenates arrays (rather than trying to merge their elements).
+   *  - doesn't guarantee that new cyclical relationships won't be created.
+   *  - doesn't guarantee good behavior when asymentrical types are encountered.
+   *
+   * @param {mixed} obj The base object to merge into.
+   * @param {mixed} other The other object to merge into the base.
+   * @param {mixed} opts Options to use for merge (optional).
    */
-  merge = corridor.merge = function(obj, other) {
+  merge = corridor.merge = function(obj, other, opts) {
     
     var i, ii, key;
     
@@ -754,6 +760,40 @@ var
     }
     
     return obj;
+  },
+  
+  /**
+   * Determine whether a candidate object can be safely merged into a base object.
+   * @param {mixed} obj The base object to test for merge safety.
+   * @param {mixed} other The candidiate object to check for safe merge.
+   */
+  safely = corridor.safely = function(obj, other) {
+    
+    var
+      typeObj = toString.call(obj),
+      typeOther = toString.call(other),
+      key;
+    
+    if (typeObj === '[object Array]') {
+      if (typeOther === '[object Array]' || typeOther === '[object Object]') {
+        return true;
+      }
+    } else if (typeObj === '[object Object]') {
+      if (typeOther === '[object Array]') {
+        return true;
+      }
+      if (typeOther === '[object Object]') {
+        for (key in other) {
+          if ((key in obj) && !safely(obj[key], other[key])) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    
+    return false;
+    
   };
 
 }).apply(null,
