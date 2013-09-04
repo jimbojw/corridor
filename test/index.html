@@ -364,6 +364,36 @@
         
       </div>
       
+      <div class="test" id="repeat">
+        
+        <script type="application/json">
+          {
+            "company": {
+              "employees": [{
+                "name": "Bob",
+                "email": "bob@company.com"
+              },{
+                "name": "Alice",
+                "email": "alice@company.com"
+              },{
+                "name": "Cynthia",
+                "email": "cynthia@company.com"
+              }]
+            }
+          }
+        </script>
+        
+        <div>
+          <table data-name="company.employees[]">
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+          </table>
+        </div>
+        
+      </div>
+      
     </div><!-- /insert-tests -->
     
   </div><!-- /corridor-fixture -->
