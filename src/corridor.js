@@ -145,8 +145,8 @@ var
         field;
       
       // build out full contribution
-      contrib = buildup("\ufff0", elem, root);
-      field = contrib.split("\ufff0").join('$$$');
+      contrib = buildup("\ufffc", elem, root);
+      field = contrib.split("\ufffc").join('$$$');
       
       // short-circuit if this field should be omitted
       if (!value && !includeEmpty(field, elem, opts)) {
@@ -157,7 +157,7 @@ var
       value = JSON.stringify(coerce(value, opts.type, opts));
       
       // inject value into contribution
-      value = contrib.replace("\ufff0", value);
+      value = contrib.replace("\ufffc", value);
       
       // merge contribution into the result data
       merge(data, JSON.parse(value));
@@ -205,14 +205,14 @@ var
         var target, path;
         
         // build up the target contribution
-        // starting with "\ufff0" value tag
-        target = JSON.parse(buildup(JSON.stringify("\ufff0"), elem, root));
+        // starting with the unicode object replacement character
+        target = JSON.parse(buildup(JSON.stringify("\ufffc"), elem, root));
         
         // insert into workspace
         merge(workspace, target);
         
         // find path to target in workspace
-        path = locate(workspace, "\ufff0");
+        path = locate(workspace, "\ufffc");
         
         // set actual val into workspace to prevent false hits for future fields
         (function(pathCopy){
@@ -407,7 +407,7 @@ var
     
     var
       
-      field = "\ufff0",                      // start out with the target mark
+      field = "\ufffc",                      // object replacement char to start
       
       parts = name
       .replace(/^\s+|\s+$/g, '')             // trim whitespace for courtesy
@@ -417,12 +417,12 @@ var
     
     arrayify(parts).forEach(function(p) {
       p = p.replace(/^\s+|\s+$/g, '');       // trim each part
-      field = field.replace("\ufff0",        // add part to field specification
-        p === '[]' ? "[\ufff0]" : "{" + JSON.stringify(p || 'undefined') + ":\ufff0}"
+      field = field.replace("\ufffc",        // add part to field specification
+        p === '[]' ? "[\ufffc]" : "{" + JSON.stringify(p || 'undefined') + ":\ufffc}"
       );
     });
     
-    return field.split("\ufff0").join('$$$');
+    return field.split("\ufffc").join('$$$');
     
   },
   
