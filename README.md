@@ -334,6 +334,53 @@ Produces this:
 Whitespace around key names is stripped, but whitespace inside them is preserved.
 For example `name=" foo bar "` would produce an object with a `foo bar` property.
 
+### merging arrays
+
+Merging arrays can be tricky, but in most cases corridor will make a good choice.
+
+In the last section, we looked at an example where the `authors` array contains normal string values.
+But let's look at what happens when the values are more complex.
+
+Consider this HTML:
+
+```html
+<table data-name="company.employees[]">
+  <tr>
+    <td><input type="text" name="name" value="Bob" /></td>
+    <td><input type="text" name="email" value="bob@company.com" /></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="name" value="Alice" /></td>
+    <td><input type="text" name="email" value="alice@company.com" /></td>
+  </tr>
+</table>
+```
+
+For this, `corridor()` produces the following:
+
+```js
+{
+  "company": {
+    "employees": [{
+      "name": "Bob",
+      "email": "bob@company.com"
+    },{
+      "name": "Alice",
+      "email": "alice@company.com"
+    }]
+  }
+}
+```
+
+The reason this works is that corridor checks each field under an arry to see if it can be safely merged into the last one.
+So when it finds Bob's `email`, it knows that it can safely add this key to the preceding Bob object without destroying data.
+
+But when it gets to Alice's `name`, it sees that it couldn't safely add the value.
+If it set the last object's `name` to Alice, then the `name` of Bob would be lost.
+So it creates a new element and sets its `name` instead.
+
+For more information on array merging, and how you can control it, see the API documentation.
+
 ### toggling sections
 
 You can mark sections of your UI as being toggleable using the `role` option.
@@ -509,6 +556,34 @@ When empty is set to `auto`, corridor uses the following algorithm to between `i
 
 If none of these conditions are met, then choose `include`.
 With this algorithim, most of the time an empty value will contribute to the output, except in cases where you probably expect it wouldn't.
+
+##### merge options
+
+The `merge` option indicates which merging strategy corridor should use when merging two arrays.
+
+Choices are:
+
+ * _auto_ - intelligently choose whether to concatenate the arrays, or deep merge them (default)
+ * _concat_ - concatenate the arrays
+ * _extend_ - deep merge each pair of items
+
+When in `auto` mode, the algorithm for choosing whether to concatenate or merge two arrays should work as follows:
+
+ * if the original array is empty, choose `concat`, otherwise,
+ * if the length of the other array is greater than one, choose `concat` (this is a strange case), otherwise,
+ * determine if the last element of the original array can be safely merged with the first element of the second array, if so, recursively merge them, otherwise,
+ * choose `concat`.
+
+The algorithm for deciding whether an object can be safely merged into a base object is as follows:
+
+ * if either argument is a primitive (not an object or array), return false, otherwise,
+ * if either argument is an array, return true (arrays can always be safely merged), otherwise,
+ * recursively check the keys of the other object, if any can't be safely merged, return false,
+ * return true.
+
+Both _auto_ and _concat_ are safe operations.
+In neither case is data lost.
+However, _extend_ is potentially (likely) unsafe—with this strategy, data is easily clobbered.
 
 ##### toggle options
 
