@@ -130,7 +130,10 @@ var
     var
       settings = extend({}, defaults, opts),
       data = {},
-      fields = selectFields(root, settings).filter(hasVal);
+      fields = selectFields(root, settings)
+        .filter(function(elem) {
+          return hasVal(elem, settings);
+        });
     
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
@@ -192,7 +195,10 @@ var
       // used to figure out true contribution paths for inserting data into elements
       workspace = {},
       
-      fields = selectFields(root, settings).filter(hasVal);
+      fields = selectFields(root, settings)
+        .filter(function(elem) {
+          return hasVal(elem, settings);
+        });
     
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
@@ -300,7 +306,33 @@ var
      *  - concat - always concatenate arrays
      *  - extend - iterate through items and merge them
      */
-    merge: 'auto'
+    merge: 'auto',
+    
+    /**
+     * Whether to include a non-form element when inserting/extracting.
+     *  - auto - intelligently decide whether each element should be included (default)
+     *  - always - always include the element for value consideration
+     *  - never - never include this element for value consideration
+     */
+    include: 'auto',
+    
+    /**
+     * Strategy for pulling a value out of a non-form element when extracting.
+     *  - auto - intelligently decide how each element's value should be extracted (default)
+     *  - value - use the value attribute (or equivalent for <select> elements)
+     *  - text - use the element's textContent
+     *  - html - use the element's innerHTML
+     */
+    extract: 'auto',
+    
+    /**
+     * Strategy for setting a value into a non-form element when inserting.
+     *  - auto - intelligently decide how each element should receive the value (default)
+     *  - value - set the value attribute (or equivalent for <select> elements)
+     *  - text - set the element's textContent
+     *  - html - set the element's innerHTML
+     */
+    insert: 'auto'
     
   },
   
@@ -661,19 +693,48 @@ var
    * Get or set the value of the specified DOM element.
    * @param {HTMLElement} elem The element whose value is to be determined or set.
    * @param {mixed} value The value to set (optional).
+   * @param {mixed} opts Options to pass to override defaults (optional).
    */
-  val = corridor.val = function(elem, value) {
+  val = corridor.val = function(elem, value, opts) {
     if (value === undefined) {
-      return getVal(elem);
+      return getVal(elem, opts);
     }
-    return setVal(elem, value);
+    return setVal(elem, value, opts);
   },
   
   /**
    * Get the value of the specified DOM element.
    * @param {HTMLElement} elem The element whose value is to be determined.
+   * @param {mixed} opts Options to pass to override defaults (optional).
    */
-  getVal = val.getVal = function(elem) {
+  getVal = val.getVal = function(elem, opts) {
+    opts = options(elem, extend({}, defaults, opts));
+    return (
+      opts.extract === 'value' ? getFormVal(elem) :
+      opts.extract === 'text' ? getText(elem) :
+      opts.extract === 'html' ? elem.innerHTML :
+      (/^(input|textbox|select)$/i).test(elem.tagName) ? getFormVal(elem) :
+      ('value' in elem) ? getFormVal(elem) :
+      elem.querySelectorAll('*').length === 0 ? getText(elem) :
+      (/^(pre|code)$/i).test(elem.tagName) ? getText(elem) :
+      elem.innerHTML
+    );
+  },
+  
+  /**
+   * Grab the text content of an element.
+   * @param {HTMLElement} elem The element.
+   * @return {string} The text content of the element.
+   */
+  getText = val.getText = function(elem) {
+    return elem.textContent || elem.innerText || '';
+  },
+  
+  /**
+   * Get the value of the specified form element.
+   * @param {HTMLElement} elem The element whose value is to be determined.
+   */
+  getFormVal = val.getFormVal = function(elem) {
     
     var
       tag = elem.tagName.toLowerCase(),
@@ -696,18 +757,27 @@ var
   /**
    * Set the value of the specified DOM element to the provided value.
    * @param {HTMLElement} elem The element whose value is to be set.
-   * @param {mixed} value The value to set (optional).
+   * @param {mixed} value The value to set.
+   * @param {mixed} opts Options to pass to override defaults (optional).
    */
-  setVal = val.setVal = function(elem, value) {
+  setVal = val.setVal = function(elem, value, opts) {
     elem.value = value;
   },
   
   /**
-   * Determine whether a specified element could have or receive a val.
+   * Determine whether a specified element could receive or produce a value.
    * @param {HTMLElement} elem The element to test.
+   * @param {mixed} opts Options to merge into element's options.
    */
-  hasVal = val.hasVal = function(elem) {
-    return (/^(input|textarea|select)$/i).test(elem.tagName.toLowerCase());
+  hasVal = val.hasVal = function(elem, opts) {
+    opts = options(elem, extend({}, defaults, opts));
+    return (
+      opts.include === 'always' ? true :
+      opts.include === 'never' ? false :
+      (/^(input|textarea|select)$/i).test(elem.tagName) ? true :
+      ('value' in elem) ? true :
+      elem.querySelectorAll('*').length === 0
+    );
   },
   
   /**
