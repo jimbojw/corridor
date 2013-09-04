@@ -227,7 +227,8 @@
             "nested-exclude": {
               "plain": "string"
             },
-            "nested-include": "Only text, include it!"
+            "nested-include": "Only text, include it!",
+            "explicit-include": "This value <i>is</i> included."
           }
         </script>
         
@@ -238,7 +239,11 @@
           <p data-name="nested-exclude">
             <span>This span keeps the parent from being extracted</span>
           </p>
+          <p data-name="explicit-exclude" data-include="never">
+            This value is not included because of the explicit include=never.
+          </p>
           <p data-name="nested-include">Only text, include it!</p>
+          <p data-name="explicit-include" data-include="always">This value <i>is</i> included.</p>
         </div>
         
       </div>
@@ -331,6 +336,30 @@
               <td><input type="text" name="email" /></td>
             </tr>
           </table>
+        </div>
+        
+      </div>
+      
+      <div class="test" id="non-form values">
+        
+        <script type="application/json">
+          {
+            "nested-exclude": {
+              "plain": "string"
+            },
+            "nested-include": "Only text, include it!",
+            "explicit-include": "This value <i>is</i> included."
+          }
+        </script>
+        
+        <div>
+          <p data-name="nested-exclude"><input name="plain" /></p>
+          <p data-name="nested-exclude"><span></span></p>
+          <p data-name="explicit-exclude" data-include="never">
+            This value is not included because of the explicit include=never.
+          </p>
+          <p data-name="nested-include"></p>
+          <p data-name="explicit-include" data-include="always">Schwuh?</p>
         </div>
         
       </div>
