@@ -1,7 +1,48 @@
 /**
  * test-merge.js - tests the merge() function.
  */
-exports['corridor.merge()'] = function(test) {
+exports['corridor.merge(objects)'] = function(test) {
+  
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
+      obj: {},
+      other: { b: 'hi' },
+      expected: { b: 'hi' },
+      reason: 'all keys should be added to empty objects'
+    },{
+      obj: { a: 'whut' },
+      other: { b: 'hi' },
+      expected: { a: 'whut', b: 'hi' },
+      reason: 'missing keys should be added to non-empty objects'
+    },{
+      obj: { "person": { "name": "Bob" } },
+      other: { "person": { "email": "bob@company.com" } },
+      expected: { "person": { "name": "Bob", "email": "bob@company.com" } },
+      reason: 'nested objects should safely merge'
+    },{
+      obj: { "person": { "name": "Bob" } },
+      other: { "person": { "name": "Alice" } },
+      expected: { "person": { "name": "Alice" } },
+      reason: 'nested conflicting objects should have their keys take precidence'
+    }];
+  
+  test.expect(suite.length);
+  
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other);
+      test.deepEqual(actual, data.expected, data.reason);
+    })(suite[i]);
+  }
+  
+  test.done();
+  
+};
+
+exports['corridor.merge(arrays)'] = function(test) {
   
   var
     
@@ -14,9 +55,14 @@ exports['corridor.merge()'] = function(test) {
       reason: 'arrays of primitives should concatenate'
     },{
       obj: [{a: 'hi'}],
+      other: [{a: 'there'}],
+      expected: [{a: 'hi'}, {a: 'there'}],
+      reason: 'arrays of conflicting objects should concatenate'
+    },{
+      obj: [{a: 'hi'}],
       other: [{b: 'there'}],
-      expected: [{a: 'hi'}, {b: 'there'}],
-      reason: 'arrays of objects should concatenate'
+      expected: [{a: 'hi', b: 'there'}],
+      reason: 'arrays of non-conflicting objects should merge'
     },{
       obj: {list: ['hi']},
       other: {list: ['there']},
@@ -27,16 +73,6 @@ exports['corridor.merge()'] = function(test) {
       other: {foo: 8, list: ['there']},
       expected: {list: ['hi','there'], foo: 8},
       reason: 'primitves should overwrite each other while arrays concatenate'
-    },{
-      obj: {},
-      other: { b: 'hi' },
-      expected: { b: 'hi' },
-      reason: 'all keys should be added to empty objects'
-    },{
-      obj: { a: 'whut' },
-      other: { b: 'hi' },
-      expected: { a: 'whut', b: 'hi' },
-      reason: 'missing keys should be added to non-empty objects'
     }];
   
   test.expect(suite.length);
@@ -44,6 +80,63 @@ exports['corridor.merge()'] = function(test) {
   for (var i = 0, ii = suite.length; i < ii; i++) {
     (function(data){
       var actual = corridor.merge(data.obj, data.other);
+      test.deepEqual(actual, data.expected, data.reason);
+    })(suite[i]);
+  }
+  
+  test.done();
+  
+};
+
+exports['corridor.merge(concat)'] = function(test) {
+  
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
+      obj: [{a: 'hi'}],
+      other: [{b: 'there'}],
+      expected: [{a: 'hi'}, {b: 'there'}],
+      reason: 'arrays of non-conflicting objects should concatenate in concat mode'
+    }];
+  
+  test.expect(suite.length);
+  
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other, {merge:'concat'});
+      test.deepEqual(actual, data.expected, data.reason);
+    })(suite[i]);
+  }
+  
+  test.done();
+  
+};
+
+exports['corridor.merge(extend)'] = function(test) {
+  
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
+      obj: [{a: 'hi'}],
+      other: [{b: 'there'}],
+      expected: [{a: 'hi', b: 'there'}],
+      reason: 'arrays of non-conflicting objects should concatenate in extend mode'
+    },{
+      obj: [{a: 'hi'}, {b: 'sneak attack!'}],
+      other: [{b: 'there'}],
+      expected: [{a: 'hi', b: 'there'}, {b: 'sneak attack!'}],
+      reason: 'arrays of objects should merge in extend mode'
+    }];
+  
+  test.expect(suite.length);
+  
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other, {merge:'extend'});
       test.deepEqual(actual, data.expected, data.reason);
     })(suite[i]);
   }

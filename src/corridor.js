@@ -291,7 +291,16 @@ var
     /**
      * When inserting/extracting, only operate on enabled fields (default: true).
      */
-    enabledOnly: true
+    enabledOnly: true,
+    
+    /**
+     * Strategy to employ when merging two objects.
+     * Recognized choices are:
+     *  - auto - intelligently merge the objects (default)
+     *  - concat - always concatenate arrays
+     *  - extend - iterate through items and merge them
+     */
+    merge: 'auto'
     
   },
   
@@ -718,26 +727,54 @@ var
   },
   
   /**
-   * Deep merge two plain object heirarchies.
-   * Does not check for hasOwnProperty.
-   * Does not deal with cyclical references (at all).
-   * Concatenates arrays (rather than trying to merge their elements).
-   * Doesn't guarantee that new cyclical relationships won't be created.
-   * Doesn't guarantee good behavior when asymentrical types are encountered.
+   * Deep merge one object into another.
+   *
+   * Notes:
+   *  - does not check for hasOwnProperty.
+   *  - does not deal with cyclical references (at all).
+   *  - concatenates arrays (rather than trying to merge their elements).
+   *  - doesn't guarantee that new cyclical relationships won't be created.
+   *  - doesn't guarantee good behavior when asymentrical types are encountered.
+   *
+   * @param {mixed} obj The base object to merge into.
+   * @param {mixed} other The other object to merge into the base.
+   * @param {mixed} opts Options to use for merge (optional).
    */
-  merge = corridor.merge = function(obj, other) {
+  merge = corridor.merge = function(obj, other, opts) {
     
-    var i, ii, key;
+    var i, ii, key, strategy = defaults.merge;
+    
+    if (opts && 'merge' in opts) {
+      strategy = opts.merge;
+    }
     
     if (toString.call(other) === '[object Array]') {
       if (toString.call(obj) === '[object Array]') {
-        for (i = 0, ii = other.length; i < ii; i++) {
-          obj.push(other[i]);
+        if (strategy === 'concat') {
+          for (i = 0, ii = other.length; i < ii; i++) {
+            obj.push(other[i]);
+          }
+        } else if (strategy === 'extend') {
+          for (i = 0, ii = other.length; i < ii; i++) {
+            merge(obj[i], other[i], opts);
+          }
+        } else {
+          if (!obj.length || other.length > 1) {
+            for (i = 0, ii = other.length; i < ii; i++) {
+              obj.push(other[i]);
+            }
+          } else {
+            if (safely(obj[obj.length - 1], other[0])) {
+              merge(obj[obj.length - 1], other[0], opts);
+            } else {
+              obj.push(other[0]);
+            }
+          }
         }
       } else {
         for (i = 0, ii = other.length; i < ii; i++) {
           if (i in obj && typeof obj[i] === 'object' && obj[i] !== null) {
-            merge(obj[i], other[i]);
+            merge(obj[i], other[i], opts);
           } else {
             obj[i] = other[i];
           }
@@ -746,7 +783,7 @@ var
     } else {
       for (key in other) {
         if (key in obj && typeof obj[key] === 'object' && obj[key] !== null) {
-          merge(obj[key], other[key]);
+          merge(obj[key], other[key], opts);
         } else {
           obj[key] = other[key];
         }
@@ -754,6 +791,40 @@ var
     }
     
     return obj;
+  },
+  
+  /**
+   * Determine whether a candidate object can be safely merged into a base object.
+   * @param {mixed} obj The base object to test for merge safety.
+   * @param {mixed} other The candidiate object to check for safe merge.
+   */
+  safely = corridor.safely = function(obj, other) {
+    
+    var
+      typeObj = toString.call(obj),
+      typeOther = toString.call(other),
+      key;
+    
+    if (typeObj === '[object Array]') {
+      if (typeOther === '[object Array]' || typeOther === '[object Object]') {
+        return true;
+      }
+    } else if (typeObj === '[object Object]') {
+      if (typeOther === '[object Array]') {
+        return true;
+      }
+      if (typeOther === '[object Object]') {
+        for (key in other) {
+          if ((key in obj) && !safely(obj[key], other[key])) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    
+    return false;
+    
   };
 
 }).apply(null,
