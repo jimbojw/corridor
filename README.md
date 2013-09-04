@@ -405,7 +405,7 @@ The HTML for that might look like this:
 </fieldset>
 ```
 
-Adding the `toggleable` role to the `<frameset>` signals to corridor that this section can be turned on and off.
+Adding the `toggleable` role to the `<fieldset>` signals to corridor that this section can be turned on and off.
 The checkbox with the role `toggle` controls it.
 
 You can nest toggleable sections inside each other.
