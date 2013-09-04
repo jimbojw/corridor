@@ -825,6 +825,58 @@ var
     
     return false;
     
+  },
+  
+  /**
+   * Determine whether a given object can be converted to an array without losing data.
+   * @param {mixed} obj The object to inspect.
+   * @return {boolean} True if this object could be converted to an array without losing data.
+   */
+  arraylike = corridor.arraylike = function(obj) {
+    
+    var
+      type = toString.call(obj),
+      posInt = /0|[1-9]\d*/,
+      length,
+      key,
+      i;
+    
+    if (type === '[object Array]') {
+      return true;
+    } else if (type !== '[object Object]') {
+      return false;
+    }
+    
+    if (('length' in obj) && !posInt.test(obj.length)) {
+      return false;
+    }
+    
+    length = 0;
+    for (key in obj) {
+      if (key !== 'length') {
+        if (!posInt.test(key)) {
+          return false;
+        }
+        length += 1;
+      }
+    }
+    
+    if (('length' in obj) && obj.length !== length) {
+      return false;
+    }
+    
+    if (length === 0) {
+      return true;
+    }
+    
+    for (i = 0; i < length; i++) {
+      if (!(i in obj)) {
+        return false;
+      }
+    }
+    
+    return true;
+    
   };
 
 }).apply(null,

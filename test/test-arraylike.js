@@ -30,11 +30,11 @@ exports['corridor.arraylike()'] = function(test) {
     },{
       obj: {"0":"bar"},
       expected: true,
-      reason: 'an object with a 0\`th element is array-like'
+      reason: 'an object with a 0\'th element is array-like'
     },{
       obj: {"1":"foo","0":"bar"},
       expected: true,
-      reason: 'an object with a 0\`th element is array-like, even with out-of-order keys'
+      reason: 'an object with a 0\'th element is array-like, even with out-of-order keys'
     },{
       obj: {"length":0},
       expected: true,
