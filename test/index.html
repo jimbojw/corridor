@@ -182,6 +182,44 @@
         
       </div>
       
+      <div class="test" id="auto merge">
+        
+        <script type="application/json">
+          {
+            "company": {
+              "employees": [{
+                "name": "Bob",
+                "email": "bob@company.com"
+              },{
+                "name": "Alice",
+                "email": "alice@company.com"
+              },{
+                "name": "Cynthia",
+                "email": "cynthia@company.com"
+              }]
+            }
+          }
+        </script>
+        
+        <div>
+          <table data-name="company.employees[]">
+            <tr>
+              <td><input type="text" name="name" value="Bob" /></td>
+              <td><input type="text" name="email" value="bob@company.com" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" value="Alice" /></td>
+              <td><input type="text" name="email" value="alice@company.com" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" value="Cynthia" /></td>
+              <td><input type="text" name="email" value="cynthia@company.com" /></td>
+            </tr>
+          </table>
+        </div>
+        
+      </div>
+      
     </div><!-- /extract tests -->
     
     <div id="insert-tests">
@@ -232,6 +270,44 @@
               <input type="text" name="person.email" />
             </label>
           </fieldset>
+        </div>
+        
+      </div>
+      
+      <div class="test" id="auto merge">
+        
+        <script type="application/json">
+          {
+            "company": {
+              "employees": [{
+                "name": "Bob",
+                "email": "bob@company.com"
+              },{
+                "name": "Alice",
+                "email": "alice@company.com"
+              },{
+                "name": "Cynthia",
+                "email": "cynthia@company.com"
+              }]
+            }
+          }
+        </script>
+        
+        <div>
+          <table data-name="company.employees[]">
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+          </table>
         </div>
         
       </div>
