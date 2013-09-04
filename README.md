@@ -510,7 +510,15 @@ For example, the `enabledOnly` property controls whether corridor will operate o
 By default `enabledOnly` is set to `true`, meaning only enabled fields are included.
 You could set `enabledOnly` to `false` in the opts hash to tell corridor to ignore the effects of toggleables.
 
-Options that apply to any field are `type` and `empty`.
+Options that apply to any field are:
+
+ * `type` - the type of the field (_auto_, _string_, _boolean_, _number_, _list_, or _json_)
+ * `empty` - whether to include the value in the output if the field is empty (_auto_, _include_, or _omit_)
+ * `merge` - strategy to use when merging arrays (_auto_, _concat_, or _extend_)
+ * `include` - whether a non-form element should be considered for insert/extract (_auto_, _always_, or _never_)
+ * `extract` - strategy for pulling a value from a non-form element when extracting (_auto_, _value_, _text_, or _html_)
+ * `insert` - strategy for putting a value into a non-form element when inserting (_auto_, _value_, _text_, or _html_)
+
 The `role` and `enabledOnly` options apply only to toggleable/toggle functionality.
 
 Note that setting options via the `opts` param specifically affects the execution of the corridor function just once.
@@ -557,7 +565,7 @@ When empty is set to `auto`, corridor uses the following algorithm to between `i
 If none of these conditions are met, then choose `include`.
 With this algorithim, most of the time an empty value will contribute to the output, except in cases where you probably expect it wouldn't.
 
-##### merge options
+##### merge option
 
 The `merge` option indicates which merging strategy corridor should use when merging two arrays.
 
@@ -589,6 +597,66 @@ In all cases, if either the original or other object is not an array, there is n
 When at least one argument is not array-like, the merge will produce an object such that no information is lost (other than what is specifically overwritten by colliding keys).
 
 For example, if the original object is an array (`["foo"]`) and the other object is a non-array-like object (`{"bar":"baz"}`). then the outcome of the merge will be an object that keeps all data in tact (`{"0":"foo","bar":"baz"}`).
+
+##### include option
+
+The `include` option indicates whether a non-form element should be considered for insert/extract.
+
+Choices are:
+
+ * _auto_ - intelligently choose whether to include the element (default).
+ * _always_ - always include the element.
+ * _never_ - never include the element.
+
+When operating in _auto_ mode, corridor uses the following algorithm to decide whether a non-form element should be considered for insert/extract:
+
+ * if the element is a form field (`input`, `textarea`, `select`), include it, otherwise,
+ * if the element has no children with `name` or `data-name` attributes, include it, otherwise,
+ * exclude it.
+
+Only elements included by this algorithm will contribute to extracted output or receive inserted data.
+
+##### extract option
+
+The `extract` option indicates how a value should be extracted from an element under consideration.
+
+Choices are:
+
+ * _auto_ - intelligently choose the best way to get a value (default).
+ * _value_ - get the element's form value (`value` attribute, except for `<select>` elements).
+ * _text_ - get the element's `textContent`.
+ * _html_ - get the element's `innerHTML`.
+
+When operating in _auto_ mode, corridor uses the following algorithm to decide how to extract a value:
+
+ * if the element is a form field, use _value_ extraction, otherwise,
+ * if the element has no child elements (only text), use _text_, otherwise,
+ * if the element is a `<pre>` or `<code>` element, use _text_, otherwise,
+ * use _html_.
+
+If you set the extract option, it's much better to set it in the HTML specifically for a particular element.
+Most of the time, you'll want the _auto_ detection.
+
+##### insert option
+
+The `insert` option indicates how a value should be inserted into an element under consideration.
+
+Choices are:
+
+ * _auto_ - intelligently choose the best way to insert the value (default).
+ * _value_ - set the element's form value (`value` attribute, except for `<select>` elements).
+ * _text_ - set the element's `textContent`.
+ * _html_ - set the element's `innerHTML`.
+
+When operating in _auto_ mode, corridor uses the following algorithm to decide how to insert a value:
+
+ * if the element is a form field, use _value_ insertion, otherwise,
+ * if the value appears to contain no HTML elements, use _text_, otherwise,
+ * if the element is a `<pre>` or `<code>` element, use _text_, otherwise,
+ * use _html_.
+
+If you set the insert option, it's much better to set it in the HTML specifically for a particular element.
+Most of the time, you'll want the _auto_ detection.
 
 ##### toggle options
 
