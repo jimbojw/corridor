@@ -220,6 +220,29 @@
         
       </div>
       
+      <div class="test" id="non-form values">
+        
+        <script type="application/json">
+          {
+            "nested-exclude": {
+              "plain": "string"
+            },
+            "nested-include": "Only text, include it!"
+          }
+        </script>
+        
+        <div>
+          <p data-name="nested-exclude">
+            <input name="plain" value="string" />
+          </p>
+          <p data-name="nested-exclude">
+            <span>This span keeps the parent from being extracted</span>
+          </p>
+          <p data-name="nested-include">Only text, include it!</p>
+        </div>
+        
+      </div>
+      
     </div><!-- /extract tests -->
     
     <div id="insert-tests">
