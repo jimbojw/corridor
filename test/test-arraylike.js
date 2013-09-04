@@ -6,6 +6,9 @@ exports['corridor.arraylike()'] = function(test) {
   var
     
     corridor = require('../src/corridor.js'),
+    tos = function(obj) {
+      return Object.prototype.toString.call(obj);
+    },
     
     suite = [{
       obj: 'hi',
@@ -51,7 +54,7 @@ exports['corridor.arraylike()'] = function(test) {
   
   test.expect(suite.length + 1);
   
-  test.equals(toString.call(corridor.arraylike), '[object Function]', 'arraylike() should be a corridor method');
+  test.equals(tos(corridor.arraylike), '[object Function]', 'arraylike() should be a corridor method');
   
   for (var i = 0, ii = suite.length; i < ii; i++) {
     (function(data){
