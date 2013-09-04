@@ -585,6 +585,11 @@ Both _auto_ and _concat_ are safe operations.
 In neither case is data lost.
 However, _extend_ is potentially (likely) unsafe—with this strategy, data is easily clobbered.
 
+In all cases, if either the original or other object is not an array, there is no ambiguity to resolve.
+When at least one argument is not array-like, the merge will produce an object such that no information is lost (other than what is specifically overwritten by colliding keys).
+
+For example, if the original object is an array (`["foo"]`) and the other object is a non-array-like object (`{"bar":"baz"}`). then the outcome of the merge will be an object that keeps all data in tact (`{"0":"foo","bar":"baz"}`).
+
 ##### toggle options
 
 Options specific to the `toggleable`/`toggle` functionality are:

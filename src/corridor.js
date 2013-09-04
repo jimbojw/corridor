@@ -742,13 +742,15 @@ var
    */
   merge = corridor.merge = function(obj, other, opts) {
     
-    var i, ii, key, strategy = defaults.merge;
+    var
+      strategy = defaults.merge,
+      i, ii, key, tmp;
     
     if (opts && 'merge' in opts) {
       strategy = opts.merge;
     }
     
-    if (toString.call(other) === '[object Array]') {
+    if (arraylike(other)) {
       if (toString.call(obj) === '[object Array]') {
         if (strategy === 'concat') {
           for (i = 0, ii = other.length; i < ii; i++) {
@@ -756,7 +758,7 @@ var
           }
         } else if (strategy === 'extend') {
           for (i = 0, ii = other.length; i < ii; i++) {
-            merge(obj[i], other[i], opts);
+            obj[i] = merge(obj[i], other[i], opts);
           }
         } else {
           if (!obj.length || other.length > 1) {
@@ -765,7 +767,7 @@ var
             }
           } else {
             if (safely(obj[obj.length - 1], other[0])) {
-              merge(obj[obj.length - 1], other[0], opts);
+              obj[obj.length - 1] = merge(obj[obj.length - 1], other[0], opts);
             } else {
               obj.push(other[0]);
             }
@@ -774,16 +776,23 @@ var
       } else {
         for (i = 0, ii = other.length; i < ii; i++) {
           if (i in obj && typeof obj[i] === 'object' && obj[i] !== null) {
-            merge(obj[i], other[i], opts);
+            obj[i] = merge(obj[i], other[i], opts);
           } else {
             obj[i] = other[i];
           }
         }
       }
     } else {
+      if (toString.call(obj) === '[object Array]') {
+        tmp = {};
+        for (i = 0, ii = obj.length; i < ii; i++) {
+          tmp[i] = obj[i];
+        }
+        obj = tmp;
+      }
       for (key in other) {
         if (key in obj && typeof obj[key] === 'object' && obj[key] !== null) {
-          merge(obj[key], other[key], opts);
+          obj[key] = merge(obj[key], other[key], opts);
         } else {
           obj[key] = other[key];
         }
@@ -824,6 +833,58 @@ var
     }
     
     return false;
+    
+  },
+  
+  /**
+   * Determine whether a given object can be converted to an array without losing data.
+   * @param {mixed} obj The object to inspect.
+   * @return {boolean} True if this object could be converted to an array without losing data.
+   */
+  arraylike = corridor.arraylike = function(obj) {
+    
+    var
+      type = toString.call(obj),
+      posInt = /0|[1-9]\d*/,
+      length,
+      key,
+      i;
+    
+    if (type === '[object Array]') {
+      return true;
+    } else if (type !== '[object Object]') {
+      return false;
+    }
+    
+    if (('length' in obj) && !posInt.test(obj.length)) {
+      return false;
+    }
+    
+    length = 0;
+    for (key in obj) {
+      if (key !== 'length') {
+        if (!posInt.test(key)) {
+          return false;
+        }
+        length += 1;
+      }
+    }
+    
+    if (('length' in obj) && obj.length !== length) {
+      return false;
+    }
+    
+    if (length === 0) {
+      return true;
+    }
+    
+    for (i = 0; i < length; i++) {
+      if (!(i in obj)) {
+        return false;
+      }
+    }
+    
+    return true;
     
   };
 
