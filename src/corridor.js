@@ -713,8 +713,7 @@ var
       opts.extract === 'value' ? getFormVal(elem) :
       opts.extract === 'text' ? getText(elem) :
       opts.extract === 'html' ? elem.innerHTML :
-      (/^(input|textbox|select)$/i).test(elem.tagName) ? getFormVal(elem) :
-      ('value' in elem) ? getFormVal(elem) :
+      isValued(elem) ? getFormVal(elem) :
       elem.querySelectorAll('*').length === 0 ? getText(elem) :
       (/^(pre|code)$/i).test(elem.tagName) ? getText(elem) :
       elem.innerHTML
@@ -761,7 +760,36 @@ var
    * @param {mixed} opts Options to pass to override defaults (optional).
    */
   setVal = val.setVal = function(elem, value, opts) {
-    elem.value = value;
+    opts = options(elem, extend({}, defaults, opts));
+    if (opts.insert === 'value') {
+      elem.value = value;
+    } else if (opts.insert === 'text') {
+      setText(elem, value);
+    } else if (opts.insert === 'html') {
+      elem.innerHTML = value;
+    } else if (isValued(elem)) {
+      elem.value = value;
+    } else if (!(/<(\w+)\b[^>]*>/i).test(value)) {
+      setText(elem, value);
+    } else if ((/^(pre|code)$/i).test(elem.tagName)) {
+      setText(elem, value);
+    } else {
+      elem.innerHTML = value;
+    }
+  },
+  
+  /**
+   * Set the text of an element to the given string.
+   * @param {HTMLElement} elem The element whose test is to be set.
+   * @param {string} text The text to set.
+   */
+  setText = val.setText = function(elem, text) {
+    if ('textContent' in elem) {
+      elem.textContent = text;
+    }
+    if ('innerText' in elem) {
+      elem.innerText = text;
+    }
   },
   
   /**
@@ -774,10 +802,17 @@ var
     return (
       opts.include === 'always' ? true :
       opts.include === 'never' ? false :
-      (/^(input|textarea|select)$/i).test(elem.tagName) ? true :
-      ('value' in elem) ? true :
+      isValued(elem) ? true :
       elem.querySelectorAll('*').length === 0
     );
+  },
+  
+  /**
+   * Determine whether a specified element is a value'd form element.
+   * @param {HTMLElement} elem The element to test.
+   */
+  isValued = val.isValued = function(elem) {
+    return (/^(input|textarea|select)$/i).test(elem.tagName) || 'value' in elem;
   },
   
   /**
