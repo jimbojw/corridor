@@ -6,6 +6,9 @@ exports['corridor.safely()'] = function(test) {
   var
     
     corridor = require('../src/corridor.js'),
+    tos = function(obj) {
+      return Object.prototype.toString.call(obj);
+    },
     
     suite = [{
       obj: 'hi',
@@ -66,7 +69,7 @@ exports['corridor.safely()'] = function(test) {
   
   test.expect(suite.length + 1);
   
-  test.equals(toString.call(corridor.safely), '[object Function]', 'safely() should be a corridor method');
+  test.equals(tos(corridor.safely), '[object Function]', 'safely() should be a corridor method');
   
   for (var i = 0, ii = suite.length; i < ii; i++) {
     (function(data){

@@ -34,7 +34,7 @@ exports['corridor.merge(objects)'] = function(test) {
   for (var i = 0, ii = suite.length; i < ii; i++) {
     (function(data){
       var actual = corridor.merge(data.obj, data.other);
-      test.deepEqual(actual, data.expected, data.reason);
+      test.equals(JSON.stringify(actual), JSON.stringify(data.expected), data.reason);
     })(suite[i]);
   }
   
@@ -80,7 +80,48 @@ exports['corridor.merge(arrays)'] = function(test) {
   for (var i = 0, ii = suite.length; i < ii; i++) {
     (function(data){
       var actual = corridor.merge(data.obj, data.other);
-      test.deepEqual(actual, data.expected, data.reason);
+      test.equals(JSON.stringify(actual), JSON.stringify(data.expected), data.reason);
+    })(suite[i]);
+  }
+  
+  test.done();
+  
+};
+
+exports['corridor.merge(mismatch)'] = function(test) {
+  
+  var
+    
+    corridor = require('../src/corridor.js'),
+    
+    suite = [{
+      obj: ['a'],
+      other: {0:'b'},
+      expected: ['a', 'b'],
+      reason: 'arraylike objects should behave like arrays for merging'
+    },{
+      obj: {"foo":"bar"},
+      other: ["baz"],
+      expected: {"foo":"bar",0:"baz"},
+      reason: 'an array should contribute numeric keys to an object'
+    },{
+      obj: ['baz'],
+      other: {"foo":"bar"},
+      expected: {0:"baz","foo":"bar"},
+      reason: 'merging a non-array-like object into an array should objectify the array'
+    },{
+      obj: {"deep":['baz']},
+      other: {"deep":{"foo":"bar"}},
+      expected: {"deep":{0:"baz","foo":"bar"}},
+      reason: 'merging a non-array-like sub-key into an array should objectify the array'
+    }];
+  
+  test.expect(suite.length);
+  
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other);
+      test.equals(JSON.stringify(actual), JSON.stringify(data.expected), data.reason);
     })(suite[i]);
   }
   
@@ -106,7 +147,7 @@ exports['corridor.merge(concat)'] = function(test) {
   for (var i = 0, ii = suite.length; i < ii; i++) {
     (function(data){
       var actual = corridor.merge(data.obj, data.other, {merge:'concat'});
-      test.deepEqual(actual, data.expected, data.reason);
+      test.equals(JSON.stringify(actual), JSON.stringify(data.expected), data.reason);
     })(suite[i]);
   }
   
@@ -137,7 +178,7 @@ exports['corridor.merge(extend)'] = function(test) {
   for (var i = 0, ii = suite.length; i < ii; i++) {
     (function(data){
       var actual = corridor.merge(data.obj, data.other, {merge:'extend'});
-      test.deepEqual(actual, data.expected, data.reason);
+      test.equals(JSON.stringify(actual), JSON.stringify(data.expected), data.reason);
     })(suite[i]);
   }
   
