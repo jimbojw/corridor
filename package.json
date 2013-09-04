@@ -6,6 +6,7 @@
     "type": "git",
     "url": "git@github.com:jimbojw/corridor.git"
   },
+  "main": "./src/corridor.js",
   "keywords": [
     "json",
     "dom",
