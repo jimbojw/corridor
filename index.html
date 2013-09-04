@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="corridor : Dead simple JSON/DOM data corridor." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>corridor</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/jimbojw/corridor">View on GitHub</a>
+
+          <h1 id="project_title">corridor</h1>
+          <h2 id="project_tagline">Dead simple JSON/DOM data corridor.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/jimbojw/corridor/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/jimbojw/corridor/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="corridor" class="anchor" href="#corridor"><span class="octicon octicon-link"></span></a>corridor</h1>
+
+<p><strong>{json} → &lt;html&gt; → {json}</strong></p>
+
+<p>Bi-directional data binding without the fuss.</p>
+
+<h2>
+<a name="why-you-need-corridor" class="anchor" href="#why-you-need-corridor"><span class="octicon octicon-link"></span></a>why you need corridor</h2>
+
+<p>Your data is in JSON, but your users interact with HTML.
+corridor's only mission is to shuttle your data between your JSON and your HTML.</p>
+
+<p>In a nutshell, corridor gives you the power to turn this:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;fieldset</span> <span class="na">name=</span><span class="s">"project"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"dependencies.foo"</span> <span class="na">value=</span><span class="s">"~0.1.0"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"dependencies.bar"</span> <span class="na">value=</span><span class="s">"~2.1.0"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/fieldset&gt;</span>
+</pre></div>
+
+<p>Into this:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"project"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"dependencies"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"foo"</span><span class="o">:</span> <span class="s2">"~0.1.0"</span><span class="p">,</span>
+      <span class="s2">"bar"</span><span class="o">:</span> <span class="s2">"~2.1.0"</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>And vice versa.</p>
+
+<h3>
+<a name="how-corridor-works" class="anchor" href="#how-corridor-works"><span class="octicon octicon-link"></span></a>how corridor works</h3>
+
+<p>corridor is a runtime library, not a templating language.
+It runs in the browser, easily transferring your data both ways: from form fields to JSON and (importantly) back again.</p>
+
+<p>corridor uses the <code>name</code> attributes of your HTML elements to determine how a given input contributes to a JSON representation.
+In most cases it'll just work, but if you need more flexibility, corridor's API options offer many points of customization.</p>
+
+<p>Read the tutorial to get started, or skip to the API section for the details.</p>
+
+<h3>
+<a name="corridors-philosophy" class="anchor" href="#corridors-philosophy"><span class="octicon octicon-link"></span></a>corridor's philosophy</h3>
+
+<p>The corridor project philosophy boils down to these points:</p>
+
+<ul>
+<li>
+<strong>unobtrusive</strong> — corridor presents just one function, has no dependencies, and causes no side-effects.</li>
+<li>
+<strong>intelligent</strong> — corridor learns what to do by looking at the data, not by being told (except where you want to).</li>
+<li>
+<strong>clear</strong> — corridor's code, functionality, tests, milestones and issues are all well documented and easy to follow.</li>
+</ul><p>Development of features, bugfixes and documentation are held to these ideals.</p>
+
+<h2>
+<a name="getting-corridor" class="anchor" href="#getting-corridor"><span class="octicon octicon-link"></span></a>getting corridor</h2>
+
+<p>corridor is a single js file with no dependencies.
+You can get it in either of two ways:</p>
+
+<ul>
+<li>from github: grab <a href="https://github.com/jimbojw/corridor/blob/master/src/corridor.js">corridor.js</a> out of the <a href="https://github.com/jimbojw/corridor">corridor repo</a>
+</li>
+<li>from npm: </li>
+</ul><div class="highlight"><pre><span class="nv">$ </span>npm install corridor
+</pre></div>
+
+<h2>
+<a name="corridor-tutorial" class="anchor" href="#corridor-tutorial"><span class="octicon octicon-link"></span></a>corridor tutorial</h2>
+
+<p>It would be great if users could just edit JSON directly.
+That way, your REST API would be all you'd need.</p>
+
+<p>But unfortunately, your users interact with the Document Object Model (DOM) representation of your HTML.
+Which means that it's your job to figure out how to get these two views of the data to match.</p>
+
+<p>The corridor library has only one function called <code>corridor()</code>.
+This function does one of two things:</p>
+
+<ul>
+<li>extract data out of a DOM heirarchy (form elements), or</li>
+<li>insert data into the DOM.</li>
+</ul><p>Let's take a look at how this works by using the practical example of a <a href="https://npmjs.org/doc/json.html"><code>package.json</code></a> file.
+We'll build out a single-page web app for manipulating a package.json file.</p>
+
+<p>To skip to the outcome of this walkthrough, see the <code>example.html</code> file.</p>
+
+<h3>
+<a name="packagejson-example-app" class="anchor" href="#packagejson-example-app"><span class="octicon octicon-link"></span></a>package.json example app</h3>
+
+<p>For a <code>package.json</code> file, you need at least the following data:</p>
+
+<ul>
+<li>name - the name of the project.</li>
+<li>version - the semantic version number of the project.</li>
+</ul><p>And you may also want the following fields:</p>
+
+<ul>
+<li>keywords - an array of keywords for npm to find your package.</li>
+<li>dependencies - a collection of package/version pairs.</li>
+</ul><p>In all, that would produce JSON something like this (values omitted):</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"name"</span><span class="o">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="s2">"version"</span><span class="o">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="s2">"keywords"</span><span class="o">:</span> <span class="p">[],</span>
+  <span class="s2">"dependencies"</span><span class="o">:</span> <span class="p">{}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Now let's put together the UI for working with this data.</p>
+
+<h3>
+<a name="corridor-fields" class="anchor" href="#corridor-fields"><span class="octicon octicon-link"></span></a>corridor fields</h3>
+
+<p>Let's start with the <code>name</code> field.
+Here's the HTML you'd need:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"name"</span> <span class="nt">/&gt;</span>
+</pre></div>
+
+<p>Let's try it out.
+Make sure you have the <code>&lt;input&gt;</code> HTML on a page and the <code>corridor.js</code> library included.
+Then you can call the corridor function with no arguments to extract all the data on the page.</p>
+
+<div class="highlight"><pre><span class="nx">corridor</span><span class="p">();</span> <span class="c1">// returns {"name":""} (or whatever you've typed in the box).</span>
+</pre></div>
+
+<p>The first argument to corridor is the root element for the data extraction.
+If you don't provide one, corridor will assume you meant to search down from the document root.</p>
+
+<h3>
+<a name="corridor-data-types" class="anchor" href="#corridor-data-types"><span class="octicon octicon-link"></span></a>corridor data types</h3>
+
+<p>By default, corridor will automatically detect the type of the value for an element.
+But you can override this behavior by providing a <code>data-type</code> attribute.</p>
+
+<p>Let's see how this applies to the <code>keywords</code> field of a package.json.</p>
+
+<p>The HTML for the keywords field should look like this:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;textarea</span> <span class="na">name=</span><span class="s">"keywords"</span> <span class="na">data-type=</span><span class="s">"list"</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+</pre></div>
+
+<p>Here the <code>data-type</code> indicates that we have a <code>list</code> value.
+corridor will try to parse the text in the <code>&lt;textarea&gt;</code> as a list of items, and will output an array.</p>
+
+<p>Let's give it a try!
+With the above <code>&lt;textarea&gt;</code> on a page, enter the text <code>"abc, def"</code> (no quotes).
+Then run corridor:</p>
+
+<div class="highlight"><pre><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">corridor</span><span class="p">(),</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="c1">// produces</span>
+<span class="p">{</span>
+  <span class="s2">"name"</span><span class="o">:</span> <span class="s2">""</span><span class="p">,</span>
+  <span class="s2">"keywords"</span><span class="o">:</span> <span class="p">[</span>
+    <span class="s2">"abc"</span><span class="p">,</span>
+    <span class="s2">"def"</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Supported data types include:</p>
+
+<ul>
+<li>auto - default, automatically detects the type.</li>
+<li>string - just treats value as a string.</li>
+<li>boolean - always true or false.</li>
+<li>number - parses string as a float.</li>
+<li>list - parses value as a list.</li>
+<li>json - treats value as valid JSON.</li>
+</ul><p>If you can't set <code>data-type</code> because your application already uses this attribute for something else, you can use <code>data-opts</code> instead.
+Here's how it would look with <code>data-opts</code>:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;textarea</span> <span class="na">name=</span><span class="s">"keywords"</span> <span class="na">data-opts=</span><span class="s">'{"type":"list"}'</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+</pre></div>
+
+<p>The <code>data-opts</code> attribute, when present, must contain valid JSON.
+Note that options specified in <code>data-opts</code> will override <code>data-*</code> attributes.</p>
+
+<p>Take this input for example:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"zip"</span> <span class="na">data-type=</span><span class="s">"string"</span> <span class="na">data-opts=</span><span class="s">'{"type":"number"}'</span> <span class="nt">/&gt;</span>
+</pre></div>
+
+<p>In this case, corridor will treat the zip as a number.</p>
+
+<h3>
+<a name="corridor-field-nesting" class="anchor" href="#corridor-field-nesting"><span class="octicon octicon-link"></span></a>corridor field nesting</h3>
+
+<p>corridor will use parent elements' names to create nested structures.</p>
+
+<p>For example, say we wanted to have drop-down choices for the <code>foo</code> and <code>bar</code> dependencies.
+The corridor HTML for that would look something like this:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;fieldset&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    foo:
+    <span class="nt">&lt;select</span> <span class="na">name=</span><span class="s">"dependencies.foo"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~1.1.0"</span><span class="nt">&gt;</span>foo: version 1<span class="nt">&lt;/option&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~2.0.0"</span><span class="nt">&gt;</span>foo: version 2<span class="nt">&lt;/option&gt;</span>
+    <span class="nt">&lt;/select&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    bar:
+    <span class="nt">&lt;select</span> <span class="na">name=</span><span class="s">"dependencies.bar"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~3.5.0"</span><span class="nt">&gt;</span>bar: version 3<span class="nt">&lt;/option&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~4.1.0"</span><span class="nt">&gt;</span>bar: version 4<span class="nt">&lt;/option&gt;</span>
+    <span class="nt">&lt;/select&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/p&gt;</span>
+</pre></div>
+
+<p>Running <code>corridor()</code> on this gives us:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"dependencies"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"foo"</span><span class="o">:</span> <span class="s2">"~1.1.0"</span><span class="p">,</span>
+    <span class="s2">"bar"</span><span class="o">:</span> <span class="s2">"~3.5.0"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>But it doesn't end there!
+Since both the <code>foo</code> and <code>bar</code> select boxes live under <code>dependencies</code>, giving a <code>name</code> to the fieldset would have the same effect:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;fieldset</span> <span class="na">name=</span><span class="s">"dependencies"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    foo:
+    <span class="nt">&lt;select</span> <span class="na">name=</span><span class="s">"foo"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~1.1.0"</span><span class="nt">&gt;</span>foo: version 1<span class="nt">&lt;/option&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~2.0.0"</span><span class="nt">&gt;</span>foo: version 2<span class="nt">&lt;/option&gt;</span>
+    <span class="nt">&lt;/select&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    bar:
+    <span class="nt">&lt;select</span> <span class="na">name=</span><span class="s">"bar"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~3.5.0"</span><span class="nt">&gt;</span>bar: version 3<span class="nt">&lt;/option&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"~4.1.0"</span><span class="nt">&gt;</span>bar: version 4<span class="nt">&lt;/option&gt;</span>
+    <span class="nt">&lt;/select&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/p&gt;</span>
+</pre></div>
+
+<p>If you run corridor against this HTML, you'll get the same JSON listed above.</p>
+
+<p>Merging works best for objects like the <code>dependencies</code> object we just looked at.
+But corridor can also merge arrays.</p>
+
+<h3>
+<a name="rich-path-names" class="anchor" href="#rich-path-names"><span class="octicon octicon-link"></span></a>rich path names</h3>
+
+<p>In the last section we saw a rudimentary example of how to create nested data structures.
+The range of supported names is quite rich.</p>
+
+<p>These are best explained by example.
+Let's say you wanted to add <code>authors</code> to your package.json form, with a separate input for each author.</p>
+
+<p>The HTML for that might look like this:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;fieldset&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    first author:
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"authors[]"</span> <span class="na">value=</span><span class="s">"your name"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    second author:
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"authors[]"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    third author:
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"authors[]"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/fieldset&gt;</span>
+</pre></div>
+
+<p>The name attribute for each author input is <code>authors[]</code>.
+The trailing square brackets means that the input value should contribute to an array.</p>
+
+<p>Running corridor on the above would give you JSON like this:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="nx">authors</span><span class="o">:</span> <span class="p">[</span>
+    <span class="s2">"your name"</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Notice that there's only one element in this array.
+By default, corridor makes an intelligent decision about wether to include empty values in the extracted data.
+See the API documentation for how exactly it decides.</p>
+
+<p>You can override the decision algorithm by specifying a <code>data-empty</code> attribute.
+If you set empty to <code>include</code>, then the element's value will be included even if it's empty.
+If you set empty to <code>omit</code>, then it'll be left out of the data representation if empty.</p>
+
+<p>Just like with the <code>dependencies.foo</code> case from last section, here we could split up the parts of the name between the fieldset and the inputs.
+E.g.</p>
+
+<div class="highlight"><pre><span class="nt">&lt;fieldset</span> <span class="na">name=</span><span class="s">"authors"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    first author:
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"[]"</span> <span class="na">value=</span><span class="s">"your name"</span> <span class="nt">/&gt;</span>
+</pre></div>
+
+<p>You can mix and match dot delimited paths and square brackets to create even richer structures.</p>
+
+<div class="highlight"><pre><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"stock.ticker[]symbols"</span> <span class="na">value=</span><span class="s">"BCOV AMZN"</span> <span class="na">data-type=</span><span class="s">"list"</span> <span class="nt">/&gt;</span>
+</pre></div>
+
+<p>Produces this:</p>
+
+<div class="highlight"><pre><span class="s2">"stock"</span><span class="o">:</span> <span class="p">{</span>
+  <span class="s2">"ticker"</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">"symbols"</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s2">"BCOV"</span><span class="p">,</span>
+        <span class="s2">"AMZN"</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Whitespace around key names is stripped, but whitespace inside them is preserved.
+For example <code>name=" foo bar "</code> would produce an object with a <code>foo bar</code> property.</p>
+
+<h3>
+<a name="merging-arrays" class="anchor" href="#merging-arrays"><span class="octicon octicon-link"></span></a>merging arrays</h3>
+
+<p>Merging arrays can be tricky, but in most cases corridor will make a good choice.</p>
+
+<p>In the last section, we looked at an example where the <code>authors</code> array contains normal string values.
+But let's look at what happens when the values are more complex.</p>
+
+<p>Consider this HTML:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;table</span> <span class="na">data-name=</span><span class="s">"company.employees[]"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;tr&gt;</span>
+    <span class="nt">&lt;td&gt;&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"name"</span> <span class="na">value=</span><span class="s">"Bob"</span> <span class="nt">/&gt;&lt;/td&gt;</span>
+    <span class="nt">&lt;td&gt;&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"email"</span> <span class="na">value=</span><span class="s">"bob@company.com"</span> <span class="nt">/&gt;&lt;/td&gt;</span>
+  <span class="nt">&lt;/tr&gt;</span>
+  <span class="nt">&lt;tr&gt;</span>
+    <span class="nt">&lt;td&gt;&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"name"</span> <span class="na">value=</span><span class="s">"Alice"</span> <span class="nt">/&gt;&lt;/td&gt;</span>
+    <span class="nt">&lt;td&gt;&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"email"</span> <span class="na">value=</span><span class="s">"alice@company.com"</span> <span class="nt">/&gt;&lt;/td&gt;</span>
+  <span class="nt">&lt;/tr&gt;</span>
+<span class="nt">&lt;/table&gt;</span>
+</pre></div>
+
+<p>For this, <code>corridor()</code> produces the following:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"company"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"employees"</span><span class="o">:</span> <span class="p">[{</span>
+      <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"Bob"</span><span class="p">,</span>
+      <span class="s2">"email"</span><span class="o">:</span> <span class="s2">"bob@company.com"</span>
+    <span class="p">},{</span>
+      <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"Alice"</span><span class="p">,</span>
+      <span class="s2">"email"</span><span class="o">:</span> <span class="s2">"alice@company.com"</span>
+    <span class="p">}]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>The reason this works is that corridor checks each field under an arry to see if it can be safely merged into the last one.
+So when it finds Bob's <code>email</code>, it knows that it can safely add this key to the preceding Bob object without destroying data.</p>
+
+<p>But when it gets to Alice's <code>name</code>, it sees that it couldn't safely add the value.
+If it set the last object's <code>name</code> to Alice, then the <code>name</code> of Bob would be lost.
+So it creates a new element and sets its <code>name</code> instead.</p>
+
+<p>For more information on array merging, and how you can control it, see the API documentation.</p>
+
+<h3>
+<a name="toggling-sections" class="anchor" href="#toggling-sections"><span class="octicon octicon-link"></span></a>toggling sections</h3>
+
+<p>You can mark sections of your UI as being toggleable using the <code>role</code> option.</p>
+
+<p>For example, say you wanted a checkbox to control whether <code>keywords</code> were going to be included in the output.
+The HTML for that might look like this:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;fieldset</span> <span class="na">data-role=</span><span class="s">"toggleable"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;p&gt;</span>
+    <span class="nt">&lt;label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">data-role=</span><span class="s">"toggle"</span> <span class="na">checked</span><span class="nt">/&gt;</span>
+      include keywords?
+    <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;/p&gt;</span>
+  <span class="nt">&lt;p&gt;</span>
+    <span class="nt">&lt;label&gt;</span>
+      keywords (list format):
+      <span class="nt">&lt;textarea</span> <span class="na">name=</span><span class="s">"keywords"</span> <span class="na">data-type=</span><span class="s">"list"</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+    <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/fieldset&gt;</span>
+</pre></div>
+
+<p>Adding the <code>toggleable</code> role to the <code>&lt;frameset&gt;</code> signals to corridor that this section can be turned on and off.
+The checkbox with the role <code>toggle</code> controls it.</p>
+
+<p>You can nest toggleable sections inside each other.
+In each case, the toggle that controls the toggleable container is the nearest child.</p>
+
+<h3>
+<a name="inserting-data" class="anchor" href="#inserting-data"><span class="octicon octicon-link"></span></a>inserting data</h3>
+
+<p>This tutorial has focused largely on explaining how data flows from HTML to JSON, but corridor is great at sending data the other way as well.</p>
+
+<p>To insert data back into the DOM, call the corridor function with a root element and a data structure object.</p>
+
+<div class="highlight"><pre><span class="nx">corridor</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">name</span><span class="o">:</span> <span class="s2">"foo"</span><span class="p">,</span>
+  <span class="nx">keywords</span><span class="o">:</span> <span class="p">[</span><span class="s2">"bar"</span><span class="p">,</span> <span class="s2">"baz"</span><span class="p">]</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>corridor uses the same <code>name</code> and <code>data-*</code> attributes to determine where data values should be inserted.</p>
+
+<h2>
+<a name="corridor-api" class="anchor" href="#corridor-api"><span class="octicon octicon-link"></span></a>corridor API</h2>
+
+<p>The corridor API consists of two major parts: the <code>corridor()</code> function itself, and the information in the HTML it uses to make decisions about how to operate.</p>
+
+<h3>
+<a name="corridor-function" class="anchor" href="#corridor-function"><span class="octicon octicon-link"></span></a>corridor() function</h3>
+
+<p>The corridor function takes three parameters, all optional:</p>
+
+<pre><code>corridor([root], [data], [opts])
+</code></pre>
+
+<p>The parameters are:</p>
+
+<ul>
+<li>
+<code>root</code> — The starting DOM element to search for named fields (defaults to <code>document</code>).</li>
+<li>
+<code>data</code> — The plain JSON data object whose values are to be inserted.</li>
+<li>
+<code>opts</code> — Additional options to inform how corridor makes decisions.</li>
+</ul><p>The presence of the second parameter, <code>data</code>, tells corridor whether it should extract data from the DOM or insert data into it.</p>
+
+<h4>
+<a name="extracting-data" class="anchor" href="#extracting-data"><span class="octicon octicon-link"></span></a>extracting data</h4>
+
+<p>To extract data from the DOM, call <code>corridor()</code> without the second argument, or set it to null.</p>
+
+<p>Examples:</p>
+
+<div class="highlight"><pre><span class="nx">corridor</span><span class="p">();</span>
+<span class="nx">corridor</span><span class="p">(</span><span class="nx">root</span><span class="p">);</span>
+<span class="nx">corridor</span><span class="p">(</span><span class="nx">root</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
+<span class="nx">corridor</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
+</pre></div>
+
+<p>In <em>extract mode</em>, corridor will:</p>
+
+<ul>
+<li>start at the <code>root</code> element,</li>
+<li>find all named fields,</li>
+<li>extract their values, and</li>
+<li>return the plain JSON data object that results.</li>
+</ul><p>This is completely safe.
+No side-effects are produced as a result of this operation, just data extraction.</p>
+
+<h4>
+<a name="inserting-data-1" class="anchor" href="#inserting-data-1"><span class="octicon octicon-link"></span></a>inserting data</h4>
+
+<p>To insert data into the DOM, call <code>corridor()</code> with an object as the second argument.</p>
+
+<p>Examples:</p>
+
+<div class="highlight"><pre><span class="nx">corridor</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+<span class="nx">corridor</span><span class="p">(</span><span class="nx">root</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+<span class="nx">corridor</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
+<span class="nx">corridor</span><span class="p">(</span><span class="nx">root</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
+</pre></div>
+
+<p>In <em>insert mode</em>, corridor will:</p>
+
+<ul>
+<li>start at the <code>root</code> element,</li>
+<li>find all named fields,</li>
+<li>set their values according to the <code>data</code> object (if a match can be found).</li>
+</ul><p>This will modify the values of discovered named fields where they differ from the data object representation.</p>
+
+<h4>
+<a name="opts" class="anchor" href="#opts"><span class="octicon octicon-link"></span></a>opts</h4>
+
+<p>The <code>opts</code> argument, when present, affects how corridor behaves in two ways.
+First, any values you specify will override the defaults for field value calculations.</p>
+
+<p>For example, say you set the <code>type</code> property to <code>binary</code>:</p>
+
+<div class="highlight"><pre><span class="nx">corridor</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="p">{</span><span class="nx">type</span><span class="o">:</span><span class="s1">'binary'</span><span class="p">});</span>
+</pre></div>
+
+<p>This means that any fields without an explicit <code>type</code> declared will be coerced to binary values.
+Fields with an explicit type (either as <code>data-type</code> or in <code>data-opts</code>) will still use their specified type though.</p>
+
+<p>Secondly, some options give hints to corridor's higher level behavior.</p>
+
+<p>For example, the <code>enabledOnly</code> property controls whether corridor will operate on fields that are disabled by a <code>toggleable</code> parent.
+By default <code>enabledOnly</code> is set to <code>true</code>, meaning only enabled fields are included.
+You could set <code>enabledOnly</code> to <code>false</code> in the opts hash to tell corridor to ignore the effects of toggleables.</p>
+
+<p>Options that apply to any field are <code>type</code> and <code>empty</code>.
+The <code>role</code> and <code>enabledOnly</code> options apply only to toggleable/toggle functionality.</p>
+
+<p>Note that setting options via the <code>opts</code> param specifically affects the execution of the corridor function just once.
+Persistent options should be stored in the HTML.</p>
+
+<h5>
+<a name="type-option" class="anchor" href="#type-option"><span class="octicon octicon-link"></span></a>type option</h5>
+
+<p>The <code>type</code> option indicates the kind of field this is.
+The type determines how corridor converts the string value of the form element into the data representation.</p>
+
+<p>The recognized types are:</p>
+
+<ul>
+<li>
+<em>auto</em> - automatically detect the correct type based on the value (default)</li>
+<li>
+<em>string</em> - treat the value as a string</li>
+<li>
+<em>boolean</em> - coerce this value to something true/false</li>
+<li>
+<em>number</em> - parse this value as a number</li>
+<li>
+<em>json</em> - leave this value as-is (will choke if it's not actually valid JSON)</li>
+<li>
+<em>list</em> - parse this value as a list of values</li>
+</ul><p>When automatically detecting the type, corridor uses the following algorithm:</p>
+
+<ol>
+<li>attempt to parse the value as JSON, if successful, use this value
+
+<ul>
+<li><em>Note: this covers booleans and numbers as well as richer JSON structures.</em></li>
+</ul>
+</li>
+<li>otherwise treat the value as a string.</li>
+</ol><p>The list type will never be auto detected.</p>
+
+<h5>
+<a name="empty-option" class="anchor" href="#empty-option"><span class="octicon octicon-link"></span></a>empty option</h5>
+
+<p>The <code>empty</code> option indicates whether the value should be included in the output if its value is empty.</p>
+
+<p>Choices are:</p>
+
+<ul>
+<li>
+<em>auto</em> - automatically detect the appropriate behavior based on the circumstances (default)</li>
+<li>
+<em>include</em> - include the value in the output (default)</li>
+<li>
+<em>omit</em> - do not add the field at all</li>
+</ul><p>When empty is set to <code>auto</code>, corridor uses the following algorithm to between <code>include</code> and <code>omit</code>:</p>
+
+<ul>
+<li>if the element has a <code>required</code> attribute, then choose <code>include</code>, otherwise,</li>
+<li>if the element would contribute a value by appending to an array (ex: <code>name="authors[]"</code>), choose <code>omit</code>, otherwise,</li>
+<li>if the element is a checkbox, choose <code>omit</code>.</li>
+</ul><p>If none of these conditions are met, then choose <code>include</code>.
+With this algorithim, most of the time an empty value will contribute to the output, except in cases where you probably expect it wouldn't.</p>
+
+<h5>
+<a name="merge-options" class="anchor" href="#merge-options"><span class="octicon octicon-link"></span></a>merge options</h5>
+
+<p>The <code>merge</code> option indicates which merging strategy corridor should use when merging two arrays.</p>
+
+<p>Choices are:</p>
+
+<ul>
+<li>
+<em>auto</em> - intelligently choose whether to concatenate the arrays, or deep merge them (default)</li>
+<li>
+<em>concat</em> - concatenate the arrays</li>
+<li>
+<em>extend</em> - deep merge each pair of items</li>
+</ul><p>When in <code>auto</code> mode, the algorithm for choosing whether to concatenate or merge two arrays should work as follows:</p>
+
+<ul>
+<li>if the original array is empty, choose <code>concat</code>, otherwise,</li>
+<li>if the length of the other array is greater than one, choose <code>concat</code> (this is a strange case), otherwise,</li>
+<li>determine if the last element of the original array can be safely merged with the first element of the second array, if so, recursively merge them, otherwise,</li>
+<li>choose <code>concat</code>.</li>
+</ul><p>The algorithm for deciding whether an object can be safely merged into a base object is as follows:</p>
+
+<ul>
+<li>if either argument is a primitive (not an object or array), return false, otherwise,</li>
+<li>if either argument is an array, return true (arrays can always be safely merged), otherwise,</li>
+<li>recursively check the keys of the other object, if any can't be safely merged, return false,</li>
+<li>return true.</li>
+</ul><p>Both <em>auto</em> and <em>concat</em> are safe operations.
+In neither case is data lost.
+However, <em>extend</em> is potentially (likely) unsafe—with this strategy, data is easily clobbered.</p>
+
+<p>In all cases, if either the original or other object is not an array, there is no ambiguity to resolve.
+When at least one argument is not array-like, the merge will produce an object such that no information is lost (other than what is specifically overwritten by colliding keys).</p>
+
+<p>For example, if the original object is an array (<code>["foo"]</code>) and the other object is a non-array-like object (<code>{"bar":"baz"}</code>). then the outcome of the merge will be an object that keeps all data in tact (<code>{"0":"foo","bar":"baz"}</code>).</p>
+
+<h5>
+<a name="toggle-options" class="anchor" href="#toggle-options"><span class="octicon octicon-link"></span></a>toggle options</h5>
+
+<p>Options specific to the <code>toggleable</code>/<code>toggle</code> functionality are:</p>
+
+<ul>
+<li>
+<strong>role</strong> — The role that this element plays in corridor operations. Choices are:
+
+<ul>
+<li>
+<em>field</em> - this element is a field whose value will contribute to extracted data (default)</li>
+<li>
+<em>toggleable</em> - this element contains fields and may be toggled on or off</li>
+<li>
+<em>toggle</em> - this element is a checkbox which toggles its nearest parent toggleable</li>
+</ul>
+</li>
+<li>
+<strong>enabledOnly</strong> — (boolean) When inserting/extracting, only operate on enabled fields (default: true).</li>
+</ul><h3>
+<a name="html-api" class="anchor" href="#html-api"><span class="octicon octicon-link"></span></a>HTML API</h3>
+
+<p>corridor inspects the Document Object Model (DOM) at runtime to figure out how to extract and insert data.
+Specificially, it looks at these things:</p>
+
+<ul>
+<li>the tag name,</li>
+<li>the <code>name</code> (or <code>data-name</code>) attribute, and</li>
+<li>the <code>data-*</code> (or <code>data-opts</code>) attributes.</li>
+</ul><p>The tag name influences whether corridor considers an element to have a value, and if so, how to retrieve it.
+For instance, the way you extract a value from a <code>&lt;textarea&gt;</code> differs from how you extract a value from a <code>&lt;select&gt;</code> element.</p>
+
+<p>The <code>name</code> attribute is by far the most important one to corridor.
+The presence of a <code>name</code> attribute (or <code>data-name</code>) tells corridor that an element should be considered for data insertion/extraction.
+The content of this attribute tells corridor exactly how to shuttle data between the element's value and the data representation.</p>
+
+<p>The <code>data-*</code> attributes, when present, override the default options (see the <em>opts</em> section above).</p>
+
+<h4>
+<a name="name-attribute" class="anchor" href="#name-attribute"><span class="octicon octicon-link"></span></a>name attribute</h4>
+
+<p>corridor uses the <code>name</code> attribute of an element to figure out how the <em>value</em> of that element relates to the <em>data</em> representation.</p>
+
+<p>You can also use the <code>data-name</code> attribute instead.
+corridor will actually check the <code>data-name</code> attribute first and use it if present, falling back to plain <code>name</code>.
+This serves two purposes.</p>
+
+<p>First, strictly speaking, not all HTML5 elements allow the <code>name</code> attribute.
+But HTML5 doel allow <code>data-</code> prefixed attributes on any element.
+If you want to assign a name to a <code>p</code> or a <code>div</code> tag, for example, you should use <code>data-name</code>.</p>
+
+<p>Secondly, <code>data-name</code> supplies an alternative should your application require that the <code>name</code> field has a specific value.
+If you need to keep <code>name</code> the same, but want corridor to address it by a different name value, you'd use <code>data-name</code>.</p>
+
+<p>There are two formats you can use when specifying the name of an element: name format and field format.</p>
+
+<p><em>Note: better names for "name format" and "field format" are forthcoming.</em></p>
+
+<h4>
+<a name="name-format" class="anchor" href="#name-format"><span class="octicon octicon-link"></span></a>name format</h4>
+
+<p>The name format is the more natural of the two formats.
+In name format, the value resembles how you'd access a nested value inside an object in JavaScript.</p>
+
+<p>For instance, say your JSON representation is this:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"book"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"The Art of War"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Then an input that maps to the <code>title</code> would have <code>name="book.title"</code>:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"book.title"</span> <span class="na">value=</span><span class="s">"The Art of War"</span><span class="nt">/&gt;</span>
+</pre></div>
+
+<p>In name format, use periods to separate keys.
+They can nest to arbitrary depth, e.g. <code>{"a":{"b":{"c":"foo"}}}</code> maps to the element with <code>name="a.b.c"</code>.</p>
+
+<p>You can also use brackets to indicate a subkey (as opposed to using a period <code>.</code>).
+For example, the following are all equivalent to <code>name="a.b.c"</code>:</p>
+
+<ul>
+<li><code>name="[a][b][c]"</code></li>
+<li><code>name="a[b]c"</code></li>
+<li><code>name="a[b].c"</code></li>
+<li><code>name="a.b[c]"</code></li>
+</ul><p>Whitespace is trimmed from the beginning and ending of keys, but not inside.
+So <code>name="a b"</code> is different from <code>name="a     b"</code>, but all of the following are equivalent to <code>name="a.b.c"</code>:</p>
+
+<ul>
+<li><code>name="[ a ][ b ][ c ]"</code></li>
+<li><code>name=" a.b.c "</code></li>
+<li><code>name="a[b].   c"</code></li>
+<li><code>name="a.   b[c]"</code></li>
+</ul><p>Finally, a pair of square brackets with nothing inside (<code>[]</code>) means that the value should contribute to an array.
+Consider this HTML:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"book.authors[]"</span> <span class="na">value=</span><span class="s">"Sunzi"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"book.authors[]"</span> <span class="na">value=</span><span class="s">"Giles, Lionel"</span><span class="nt">/&gt;</span>
+</pre></div>
+
+<p>With corridor, this would map to the following data representation:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"book"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"authors"</span><span class="o">:</span> <span class="p">[</span>
+      <span class="s2">"Sunzi"</span><span class="p">,</span>
+      <span class="s2">"Giles, Lionel"</span>
+    <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Where you're appending to an array, you'll probably want the square brackets at the end, but this isn't strictly necessary.
+Your name attribute can have additional keys and bracket pairs after the first.
+Here are a few example names and the JSON data they'd map to:</p>
+
+<div class="highlight"><pre><span class="c1">// &lt;input name="authors[]name" value="Sunzi" /&gt;</span>
+<span class="p">{</span>
+  <span class="s2">"authors"</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"Sunzi"</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+<div class="highlight"><pre><span class="c1">// &lt;input name="authors[][]" value="Sunzi" /&gt;</span>
+<span class="p">{</span>
+  <span class="s2">"authors"</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">[</span> <span class="s2">"Sunzi"</span> <span class="p">]</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+<div class="highlight"><pre><span class="c1">// &lt;input name="[][author]" value="Sunzi" /&gt;</span>
+<span class="p">[</span> <span class="p">{</span> <span class="s2">"author"</span><span class="o">:</span> <span class="s2">"Sunzi"</span> <span class="p">}</span> <span class="p">]</span>
+</pre></div>
+
+<p>In most cases, using name format for your name attributes will give you what you need to correctly shuttle data between your JSON and your HTML.
+However, if your JSON is quite complex, you may need to use field format for some of your elements.</p>
+
+<h4>
+<a name="field-format" class="anchor" href="#field-format"><span class="octicon octicon-link"></span></a>field format</h4>
+
+<p>Whereas name format resembles how you'd <em>access</em> an object in JavaScript, field format resembles how you describe an object in JavaScript—that is, JSON.</p>
+
+<p>With field format, you specify how your data should appear as properly formatted JSON.
+Except that you replace the value with the literal string <code>$$$</code>.</p>
+
+<p>For example, consider the name format string <code>book.title</code>.
+The field format version would be <code>{"book":{"title":$$$}}</code>.
+Any name format string can be converted to field format, but the opposite is not always true.</p>
+
+<p>Here are some name format strings and their field format equivalents:</p>
+
+<ul>
+<li>
+<code>title</code> → <code>{"title":$$$}</code>
+</li>
+<li>
+<code>book.title</code> → <code>{"book":{"title":$$$}}</code>
+</li>
+<li>
+<code>authors[]</code> → <code>{"authors":[$$$]}</code>
+</li>
+<li>
+<code>authors[]name</code> → <code>{"authors":[{"name":$$$}]}</code>
+</li>
+<li>
+<code>[]</code> → <code>[$$$]</code>
+</li>
+<li>
+<code>a.b.c</code> → <code>{"a":{"b":{"c":$$$}}}</code>
+</li>
+</ul><p>When possible, you should use the name format for your name attributes.
+But there are some rare cases where field format is the better option.</p>
+
+<h4>
+<a name="data-opts-attribute" class="anchor" href="#data-opts-attribute"><span class="octicon octicon-link"></span></a>data-opts attribute</h4>
+
+<p>Just as <code>data-*</code> attributes override the default options, <code>data-opts</code> can also be used to override options.
+If present, the <code>data-opts</code> attribute must contain valid JSON.</p>
+
+<p>For example <code>data-type="list"</code> is the same as <code>data-opts='{"type":"list"}'</code>.
+When both a <code>data-*</code> attribute and a <code>data-opts</code> key have the same name (like in this list example) corridor will use the value in <code>data-opts</code>.
+This way, if your application already uses a <code>data-*</code> attribute that would conflict with corridor, you can use <code>data-opts</code> instead.</p>
+
+<h2>
+<a name="issues-and-feature-requests" class="anchor" href="#issues-and-feature-requests"><span class="octicon octicon-link"></span></a>issues and feature requests</h2>
+
+<p>If you find any issues with corridor, or if you'd like to request a feature, please head over to the <a href="https://github.com/jimbojw/corridor/issues">issues page on github</a>.</p>
+
+<p>Keep in mind that the more specific you are, the more likely your issue or feature is to be addressed.</p>
+
+<h2>
+<a name="questions" class="anchor" href="#questions"><span class="octicon octicon-link"></span></a>questions</h2>
+
+<p>If you have a question about how to use corridor, or if you're not sure if you're doing it right, go to <a href="http://stackoverflow.com/">stackoverflow</a> and <a href="http://stackoverflow.com/questions/ask?tags=corridor">ask a question</a>.
+Make sure you add the <code>corridor</code> tag to your question.</p>
+
+<h2>
+<a name="developing-corridor" class="anchor" href="#developing-corridor"><span class="octicon octicon-link"></span></a>developing corridor</h2>
+
+<p>If you're interested in developing corridor, great!
+Start by forking <a href="https://github.com/jimbojw/corridor">corridor on github</a>.</p>
+
+<p>Once you've forked the project, clone it using <code>git clone</code>:</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>git clone git@github.com:&lt;YOUR_USERNAME&gt;/corridor.git
+</pre></div>
+
+<p>The source code for corridor itself is in the <code>src/</code> directory.</p>
+
+<p>corridor uses npm for packaging and deployment, so you'll need to install Node.js if you haven't already.
+Once you have Node, you can pull in corridor's development dependencies:</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>npm install
+</pre></div>
+
+<h3>
+<a name="testing-corridor" class="anchor" href="#testing-corridor"><span class="octicon octicon-link"></span></a>testing corridor</h3>
+
+<p>The corridor unit tests are in the <code>test/</code> directory.
+corridor's unit tests are written to run in <a href="https://npmjs.org/package/nodeunit">nodeunit</a> or with <a href="http://qunitjs.com/">QUnit</a>.</p>
+
+<p>After installing the npm dependencies, you can run the corridor unit tests from the command line like this:</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>npm <span class="nb">test</span>
+</pre></div>
+
+<p>To run the unit tests in the browser, just open <code>test/index.html</code> and they'll run automatically.</p>
+
+<h3>
+<a name="submitting-changes" class="anchor" href="#submitting-changes"><span class="octicon octicon-link"></span></a>submitting changes</h3>
+
+<p>When you're satisfied with your changes, commit them and push them to your forked repository.
+Then open a pull request in github by hitting the big "Pull Request" button from the main project repo page.</p>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>See LICENSE</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">corridor maintained by <a href="https://github.com/jimbojw">jimbojw</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
