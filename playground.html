@@ -87,7 +87,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr data-name="company.employees[]" data-expand="always">
+        <tr data-name="company.employees[]">
           <td><input type="checkbox" name="active" /></td>
           <td><input type="text" name="name" /></td>
           <td><input type="text" name="email" /></td>
@@ -139,7 +139,7 @@ document.querySelector('#extract').onclick = function(e) {
 };
 
 document.querySelector('#insert').onclick = function(e) {
-  corridor(input, JSON.parse(output.value));
+  corridor(input, JSON.parse(output.value), {"expand":"auto"});
 };
 
 corridor.log = true;
