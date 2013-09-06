@@ -15,8 +15,20 @@ exports['corridor.clone()'] = function(test) {
       original: {},
       description: 'empty object'
     },{
+      original: {"foo":{"bar":"baz"}},
+      description: 'nested object'
+    },{
       original: [],
       description: 'empty array'
+    },{
+      original: [["a"],["b"],["c"]],
+      description: 'nested arrays'
+    },{
+      original: {"list":[["a"],["b"],["c"]]},
+      description: 'mixed arrays and objects'
+    },{
+      original: [{"list":[["a"],["b"],["c"]]}],
+      description: 'mixed arrays and objects'
     }];
   
   test.expect(2 * suite.length + 1);
