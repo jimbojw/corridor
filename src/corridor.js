@@ -297,12 +297,11 @@ var
       // compare length of elems to data mapped array to determine shortfall
       shortfall = arry.length - candidate.elems.length;
       
-      if (shortfall > 0) {
+      // choose best element for clone target
+      target = findExpandTarget(candidate.elems[candidate.elems.length - 1], root, settings);
+      
+      if (target && shortfall > 0) {
         
-        // pick clone target
-        //  - where to start? (last one? best one? round robin?)
-        //  - where to go? (same elem? walk up DOM? walk down?)
-        target = candidate.elems[candidate.elems.length - 1];
         sibling = target.nextSibling;
         parent = target.parentNode;
         
@@ -344,6 +343,7 @@ var
      *  - field - this element is a field whose value will contribute to extracted data (default)
      *  - toggleable - this element contains fields and may be toggled on or off
      *  - toggle - this element is a checkbox which toggles its nearest parent toggleable
+     *  - expand - this element is meant to be expanded (cloned) to accomodate data in the case of a shortfall
      */
     role: "field",
     
@@ -401,7 +401,8 @@ var
     
     /**
      * Strategy for expanding the DOM to accomodate arrays of data.
-     *  - never - do not modify the DOM to try and accomodate data (defalut)
+     *  - never - do not modify the DOM to try and accomodate data (default)
+     *  - auto - intelligently decide whether to expand based on circumstances
      *  - always - when a shortfall is detected, expand the DOM
      */
     expand: 'never'
@@ -428,7 +429,7 @@ var
     while (queue.length) {
       elem = queue.shift();
       if (elem.hasAttribute('name') || elem.hasAttribute('data-name')) {
-        if (options(elem, settings).expand === 'always') {
+        if (options(elem, settings).expand !== 'never') {
           field = buildup(ufc, elem, root);
           if (field.indexOf("["+ufc+"]") !== -1) {
             path = locate(JSON.parse(field), "\ufffc").slice(0, -1);
@@ -452,6 +453,59 @@ var
     
     return candidates;
     
+  },
+  
+  /**
+   * Given an element, intelligently find the best choice for DOM expanssion.
+   * @param {HTMLElement} elem The element to start from.
+   * @param {HTMLElement} root The highest element to consider.
+   * @param {object} opts Options (optional).
+   */
+  findExpandTarget = corridor.expand.findExpandTarget = function(elem, root, opts) {
+    
+    var target;
+    
+    // non-value'd elements inspect downwards
+    if (!hasVal(elem)) {
+      
+      // check for child with the data-role expand
+      target = null;
+      arrayify(elem.querySelectorAll('[data-role], [data-opts]'))
+        .forEach(function(child) {
+          if (!target) {
+            if (options(child).role === 'expand') {
+              target = child;
+            }
+          }
+        });
+      
+      return target || elem;
+      
+    }
+    
+    // walk up the DOM looking for an ancestor with the exand role
+    target = null;
+    upwalk(elem, root, function(parent, field, opts){
+      if (opts.role === 'expand') {
+        target = parent;
+        return false;
+      }
+    });
+    if (target) {
+      return target;
+    }
+    
+    // if there are no ancestors with role expand, look for special elements
+    var node = elem;
+    while (node) {
+      if ((/^(tr|li)$/i).test(node.tagName)) {
+        return node;
+      }
+      node = node === root ? null : node.parentNode;
+    }
+    
+    // couldn't find a better target than the element itself
+    return elem;
   },
   
   /**
@@ -944,7 +998,7 @@ var
    * @param {HTMLElement} elem The element to test.
    */
   isValued = val.isValued = function(elem) {
-    return (/^(input|textarea|select)$/i).test(elem.tagName) || 'value' in elem;
+    return (/^(input|textarea|select)$/i).test(elem.tagName);
   },
   
   /**
