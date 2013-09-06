@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>corridor — playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <style>
+    button { font-size: large; }
+    textarea { width: 100%; }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    td {
+      padding: 5px;
+      vertical-align: middle;
+    }
+    td input[type=text] {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>corridor playground</h1>
+  <p>
+    Just for testing/experimentation.
+  </p>
+  <div id="output">
+    <textarea rows="8">
+      {
+        "company": {
+          "employees": [{
+            "name": "Bob",
+            "email": "bob@company.com"
+          },{
+            "name": "Alice",
+            "email": "alice@company.com"
+          },{
+            "name": "Cynthia",
+            "email": "cynthia@company.com"
+          }]
+        }
+      }
+    </textarea>
+  </div>
+  <div class="actions">
+    <p>
+      <button id="extract">&uArr; extract data &uArr;</button>
+      <button id="insert">&dArr; insert data &dArr;</button>
+    </p>
+  </div>
+  <div id="input">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>name</th>
+          <th>email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-name="company.employees[]">
+          <td><input type="checkbox" name="active" /></td>
+          <td><input type="text" name="name" /></td>
+          <td><input type="text" name="email" /></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script src="src/corridor.js"></script>
+<script>
+(function(window, document, corridor, undefined){
+
+var
+  
+  // relevant elements
+  input = document.querySelector('#input'),
+  output = document.querySelector('#output textarea');
+
+// extract button should send data to textarea
+document.querySelector('#extract').onclick = function(e) {
+  output.value = JSON.stringify(corridor(input), null, '  ');
+};
+
+document.querySelector('#insert').onclick = function(e) {
+  corridor(input, JSON.parse(output.value), {"expand": true});
+};
+
+corridor.log = true;
+
+})(window, document, corridor);
+</script>
+<!--script src="http://code.jquery.com/jquery-git2.js"></script-->
+</body>
+</html>
