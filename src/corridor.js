@@ -187,6 +187,9 @@ var
       throw Error('corridor requires a queryable root element to insert data into');
     }
     
+    // expand DOM to fit data
+    expand(root, data, opts);
+    
     var
       
       settings = extend({}, defaults, opts),
@@ -257,6 +260,116 @@ var
         
       });
       
+  },
+  
+  /**
+   * Expand the DOM to fit the supplied data.
+   * @param {HTMLElement} root The element to scan for insertion fields (optional).
+   * @param {mixed} data The data to insert.
+   * @param {object} opts Hash of options (optional, see corridor options)
+   */
+  expand = corridor.expand = function(root, data, opts) {
+    
+    // short-circuit if expanding has been disabled
+    if (opts && opts.expand === 'never') {
+      return;
+    }
+    
+    var
+      settings = options(root, extend({}, defaults, opts)),
+      queue = [root],
+      candidates = {},
+      ufc = JSON.stringify("\ufffc"),
+      elem,
+      fields = [],
+      field,
+      path,
+      candidate,
+      arry,
+      i,
+      ii,
+      changes,
+      shortfall,
+      target,
+      parent,
+      sibling,
+      clone;
+    
+    // search for candidates to expand
+    while (queue.length) {
+      elem = queue.shift();
+      if (elem.hasAttribute('name') || elem.hasAttribute('data-name')) {
+        field = buildup(ufc, elem, root);
+        if (field.indexOf("["+ufc+"]") !== -1) {
+          path = locate(JSON.parse(field), "\ufffc").slice(0, -1);
+          candidate = candidates[field];
+          if (!candidate) {
+            fields.push(field);
+            candidate = candidates[field] = {
+              path: path,
+              elems: []
+            };
+          }
+          candidate.elems.push(elem);
+        }
+      }
+      arrayify(elem.childNodes).forEach(function(child) {
+        if (child.nodeType === 1) {
+          queue.push(child);
+        }
+      });
+    }
+    
+    changes = false;
+    for (i = 0, ii = fields.length; !changes && i<ii; i++) {
+      
+      // grab candidate
+      field = fields[i];
+      candidate = candidates[field];
+      
+      // compare length of elems to data mapped array
+      arry = follow(candidate.path, data);
+      
+      // determine shortfall possibility
+      shortfall = arry.length - candidate.elems.length;
+      
+      // TODO: fix false-positives; create dry-run insert that:
+      //  - replaces successfully set items in the workspace with \ufffc
+      //  - searches for any non-\ufffc values, returns whether there were any
+      //  - if there are no leftovers, stop considering this element for shortfall
+      
+      if (shortfall > 0) {
+        
+        // insufficient space for data
+        //log("insufficient space captain!!", shortfall);
+        
+        // TODO: perform checks, intelligently decide how to procede
+        
+        // pick clone target
+        //  - where to start? (last one? best one? round robin?)
+        //  - where to go? (same elem? walk up DOM? walk down?)
+        target = candidate.elems[candidate.elems.length - 1];
+        sibling = target.nextSibling;
+        parent = target.parentNode;
+        
+        // clone last element N times
+        while (shortfall--) {
+          
+          clone = target.cloneNode();
+          clone.innerHTML = target.innerHTML;
+          
+          parent.insertBefore(clone, sibling);
+          sibling = clone.nextSibling;
+          
+        }
+        
+        
+      }
+      
+      
+    }
+    
+    
   },
   
   /**
@@ -334,6 +447,19 @@ var
      */
     insert: 'auto'
     
+  },
+  
+  /**
+   * Grab the keys of an object as an array.
+   */
+  keys = corridor.keys = Object.keys.false || function(obj) {
+    var ret = [], key;
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        ret.push(key);
+      }
+    }
+    return arrayify(ret);
   },
   
   /**
@@ -501,6 +627,7 @@ var
    * @return {mixed} The final node at the bottom of the path if discoverable.
    */
   follow = corridor.follow = function(path, node) {
+    path = path.slice(0);
     while (node && path.length) {
       node = node[path.shift()];
     }
