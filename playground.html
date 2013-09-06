@@ -56,13 +56,10 @@
             "email": "doris@company.com"
           }]
         },
-        "animalsounds": [
-          "moo",
-          "woof",
-          "ow-ow-ow",
-          "meow",
-          "Aooo-ooo-oo-ooo"
-        ]
+        "animalsounds": {
+          "auto": [ "moo", "woof", "ow-ow-ow", "meow", "Aooo-ooo-oo-ooo" ],
+          "role": [ "moo", "woof", "ow-ow-ow", "meow", "Aooo-ooo-oo-ooo" ]
+        }
       }
     </textarea>
   </div>
@@ -74,9 +71,12 @@
   </div>
   <div id="input">
     <h2>animal sounds</h2>
-    <ol data-name="animalsounds">
-      <li><input name="[]" data-expand="always" /></li>
+    <ol>
+      <li><input name="animalsounds.auto[]" /></li>
     </ol>
+    <div>
+      <p data-role="expand"><input name="animalsounds.role[]" /></li>
+    </div>
     <h2>employees</h2>
     <table>
       <thead>
