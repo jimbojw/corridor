@@ -364,7 +364,7 @@
         
       </div>
       
-      <div class="test" id="expand">
+      <div class="test" id="expand table">
         
         <script type="application/json">
           {
@@ -397,6 +397,28 @@
             "expand": "always"
           }
         </script>
+        
+      </div>
+      
+      <div class="test" id="expand list">
+        
+        <script type="application/json">
+          {
+            "animalsounds": [
+              "moo",
+              "woof",
+              "ow-ow-ow",
+              "meow",
+              "Aooo-ooo-oo-ooo"
+            ]
+          }
+        </script>
+        
+        <div>
+          <ul data-name="animalsounds">
+            <li><input name="[]" data-expand="always"/></li>
+          </ul>
+        </div>
         
       </div>
       
