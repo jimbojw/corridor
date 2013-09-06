@@ -19,7 +19,7 @@ exports['corridor.clone()'] = function(test) {
       description: 'empty array'
     }];
   
-  test.expect(suite.length + 1);
+  test.expect(2 * suite.length + 1);
   
   test.equals(tos(corridor.clone), '[object Function]', 'clone() should be a corridor method');
   
@@ -28,10 +28,10 @@ exports['corridor.clone()'] = function(test) {
       
       var
         expected = data.original,
-        actual = corridor.clone(data.original);
+        actual = corridor.clone(expected);
         
       test.notStrictEqual(actual, expected, data.description + ' - clone output must not be strictly equal to original');
-      test.deepEqual(actual, expected + ' - clone output must be deepEqual to original');
+      test.deepEqual(actual, expected, data.description + ' - clone output must be deepEqual to original');
       
     })(suite[i]);
   }

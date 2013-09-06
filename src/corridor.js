@@ -1118,6 +1118,15 @@ var
     
     return true;
     
+  },
+  
+  /**
+   * Create a deep clone of a plain object.
+   * @param {mixed} obj The object to clone.
+   * @return {mixed} A deep clone of the original object.
+   */
+  clone = corridor.clone = function(obj) {
+    return JSON.parse(JSON.stringify(obj));
   };
 
 }).apply(null,
