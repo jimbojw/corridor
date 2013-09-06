@@ -41,6 +41,19 @@
           },{
             "name": "Cynthia",
             "email": "cynthia@company.com"
+          }],
+          "administrators": [{
+            "name": "Bob",
+            "email": "bob@company.com"
+          },{
+            "name": "Alice",
+            "email": "alice@company.com"
+          },{
+            "name": "Cynthia",
+            "email": "cynthia@company.com"
+          },{
+            "name": "Doris",
+            "email": "doris@company.com"
           }]
         }
       }
@@ -53,6 +66,7 @@
     </p>
   </div>
   <div id="input">
+    <h2>employees</h2>
     <table>
       <thead>
         <tr>
@@ -62,7 +76,34 @@
         </tr>
       </thead>
       <tbody>
-        <tr data-name="company.employees[]">
+        <tr data-name="company.employees[]" data-expand="always">
+          <td><input type="checkbox" name="active" /></td>
+          <td><input type="text" name="name" /></td>
+          <td><input type="text" name="email" /></td>
+        </tr>
+      </tbody>
+    </table>
+    <h2>administrators</h2>
+    <table data-name="company.administrators[]">
+      <thead>
+        <tr>
+          <th></th>
+          <th>name</th>
+          <th>email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox" name="active" /></td>
+          <td><input type="text" name="name" /></td>
+          <td><input type="text" name="email" /></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" name="active" /></td>
+          <td><input type="text" name="name" /></td>
+          <td><input type="text" name="email" /></td>
+        </tr>
+        <tr>
           <td><input type="checkbox" name="active" /></td>
           <td><input type="text" name="name" /></td>
           <td><input type="text" name="email" /></td>
@@ -87,7 +128,7 @@ document.querySelector('#extract').onclick = function(e) {
 };
 
 document.querySelector('#insert').onclick = function(e) {
-  corridor(input, JSON.parse(output.value), {"expand": true});
+  corridor(input, JSON.parse(output.value));
 };
 
 corridor.log = true;
