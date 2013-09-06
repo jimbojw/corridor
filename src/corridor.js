@@ -270,11 +270,6 @@ var
    */
   expand = corridor.expand = function(root, data, opts) {
     
-    // short-circuit if expanding has been disabled
-    if (opts && opts.expand === 'never') {
-      return;
-    }
-    
     var
       settings = options(root, extend({}, defaults, opts)),
       queue = [root],
@@ -293,24 +288,27 @@ var
       target,
       parent,
       sibling,
-      clone;
+      cloneElem,
+      falsePositive;
     
     // search for candidates to expand
     while (queue.length) {
       elem = queue.shift();
       if (elem.hasAttribute('name') || elem.hasAttribute('data-name')) {
-        field = buildup(ufc, elem, root);
-        if (field.indexOf("["+ufc+"]") !== -1) {
-          path = locate(JSON.parse(field), "\ufffc").slice(0, -1);
-          candidate = candidates[field];
-          if (!candidate) {
-            fields.push(field);
-            candidate = candidates[field] = {
-              path: path,
-              elems: []
-            };
+        if (options(elem, settings).expand === 'always') {
+          field = buildup(ufc, elem, root);
+          if (field.indexOf("["+ufc+"]") !== -1) {
+            path = locate(JSON.parse(field), "\ufffc").slice(0, -1);
+            candidate = candidates[field];
+            if (!candidate) {
+              fields.push(field);
+              candidate = candidates[field] = {
+                path: path,
+                elems: []
+              };
+            }
+            candidate.elems.push(elem);
           }
-          candidate.elems.push(elem);
         }
       }
       arrayify(elem.childNodes).forEach(function(child) {
@@ -333,15 +331,7 @@ var
       // determine shortfall possibility
       shortfall = arry.length - candidate.elems.length;
       
-      // TODO: fix false-positives; create dry-run insert that:
-      //  - replaces successfully set items in the workspace with \ufffc
-      //  - searches for any non-\ufffc values, returns whether there were any
-      //  - if there are no leftovers, stop considering this element for shortfall
-      
       if (shortfall > 0) {
-        
-        // insufficient space for data
-        //log("insufficient space captain!!", shortfall);
         
         // TODO: perform checks, intelligently decide how to procede
         
@@ -355,11 +345,11 @@ var
         // clone last element N times
         while (shortfall--) {
           
-          clone = target.cloneNode();
-          clone.innerHTML = target.innerHTML;
+          cloneElem = target.cloneNode();
+          cloneElem.innerHTML = target.innerHTML;
           
-          parent.insertBefore(clone, sibling);
-          sibling = clone.nextSibling;
+          parent.insertBefore(cloneElem, sibling);
+          sibling = cloneElem.nextSibling;
           
         }
         
@@ -445,7 +435,14 @@ var
      *  - text - set the element's textContent
      *  - html - set the element's innerHTML
      */
-    insert: 'auto'
+    insert: 'auto',
+    
+    /**
+     * Strategy for expanding the DOM to accomodate arrays of data.
+     *  - never - do not modify the DOM to try and accomodate data (defalut)
+     *  - always - when a shortfall is detected, expand the DOM
+     */
+    expand: 'never'
     
   },
   
