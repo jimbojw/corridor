@@ -272,68 +272,32 @@ var
     
     var
       settings = options(root, extend({}, defaults, opts)),
-      queue = [root],
-      candidates = {},
-      ufc = JSON.stringify("\ufffc"),
-      elem,
-      fields = [],
-      field,
-      path,
-      candidate,
-      arry,
-      i,
-      ii,
-      changes,
-      shortfall,
-      target,
-      parent,
-      sibling,
-      cloneElem,
-      falsePositive;
-    
-    // search for candidates to expand
-    while (queue.length) {
-      elem = queue.shift();
-      if (elem.hasAttribute('name') || elem.hasAttribute('data-name')) {
-        if (options(elem, settings).expand === 'always') {
-          field = buildup(ufc, elem, root);
-          if (field.indexOf("["+ufc+"]") !== -1) {
-            path = locate(JSON.parse(field), "\ufffc").slice(0, -1);
-            candidate = candidates[field];
-            if (!candidate) {
-              fields.push(field);
-              candidate = candidates[field] = {
-                path: path,
-                elems: []
-              };
-            }
-            candidate.elems.push(elem);
-          }
-        }
-      }
-      arrayify(elem.childNodes).forEach(function(child) {
-        if (child.nodeType === 1) {
-          queue.push(child);
-        }
-      });
-    }
-    
-    changes = false;
-    for (i = 0, ii = fields.length; !changes && i<ii; i++) {
       
-      // grab candidate
-      field = fields[i];
-      candidate = candidates[field];
+      // search for candidates to expand
+      candidates = findExpandCandidates(root, settings);
+    
+    keys(candidates).forEach(function(field){
       
-      // compare length of elems to data mapped array
+      var
+        
+        // grab candidate
+        candidate = candidates[field],
+        
+        // grab matching array from input data
+        arry = follow(candidate.path, data),
+        
+        shortfall,
+        target,
+        parent,
+        sibling,
+        cloneElem;
+      
       arry = follow(candidate.path, data);
       
-      // determine shortfall possibility
+      // compare length of elems to data mapped array to determine shortfall
       shortfall = arry.length - candidate.elems.length;
       
       if (shortfall > 0) {
-        
-        // TODO: perform checks, intelligently decide how to procede
         
         // pick clone target
         //  - where to start? (last one? best one? round robin?)
@@ -353,11 +317,9 @@ var
           
         }
         
-        
       }
       
-      
-    }
+    });
     
     
   },
@@ -443,6 +405,52 @@ var
      *  - always - when a shortfall is detected, expand the DOM
      */
     expand: 'never'
+    
+  },
+  
+  /**
+   * Given an element, find candidates for DOM expanssion.
+   * Once a candidate is found, it is not recursively searched.
+   * @param {HTMLElement} root The element to start from.
+   * @param {object} opts Options (optional).
+   */
+  findExpandCandidates = corridor.expand.findExpandCandidates = function(root, opts) {
+    
+    var
+      settings = extend({}, defaults, opts),
+      queue = [root],
+      candidates = {},
+      ufc = JSON.stringify("\ufffc"),
+      
+      // iteration vars
+      elem, field, path, candidate;
+    
+    while (queue.length) {
+      elem = queue.shift();
+      if (elem.hasAttribute('name') || elem.hasAttribute('data-name')) {
+        if (options(elem, settings).expand === 'always') {
+          field = buildup(ufc, elem, root);
+          if (field.indexOf("["+ufc+"]") !== -1) {
+            path = locate(JSON.parse(field), "\ufffc").slice(0, -1);
+            candidate = candidates[field];
+            if (!candidate) {
+              candidate = candidates[field] = {
+                path: path,
+                elems: []
+              };
+            }
+            candidate.elems.push(elem);
+          }
+        }
+      }
+      arrayify(elem.childNodes).forEach(function(child) {
+        if (child.nodeType === 1) {
+          queue.push(child);
+        }
+      });
+    }
+    
+    return candidates;
     
   },
   
