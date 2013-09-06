@@ -364,7 +364,7 @@
         
       </div>
       
-      <div class="test" id="repeat">
+      <div class="test" id="expand">
         
         <script type="application/json">
           {
@@ -384,13 +384,19 @@
         </script>
         
         <div>
-          <table data-name="company.employees[]">
-            <tr>
+          <table>
+            <tr data-name="company.employees[]">
               <td><input type="text" name="name" /></td>
               <td><input type="text" name="email" /></td>
             </tr>
           </table>
         </div>
+        
+        <script type="application/json" class="options">
+          {
+            "expand": true
+          }
+        </script>
         
       </div>
       
@@ -471,15 +477,19 @@ QUnit.test('integration — insert()', function() {
       
       var 
         script = test.querySelector('script'),
+        opts = test.querySelector('.options'),
         root = test.querySelector('div'),
         original = JSON.parse(script.textContent || script.innerText || script.innerHTML),
         actual;
       
+      opts = opts ? opts.textContent || opts.innerText || opts.innerHTML || '' : '';
+      opts = JSON.parse(opts || '{}');
+      
       // insert data with corridor
-      corridor(root, original);
+      corridor(root, original, opts);
       
       // extract it back out again
-      actual = corridor(root);
+      actual = corridor(root, null, opts);
       
       QUnit.deepEqual(actual, original, test.id);
       
