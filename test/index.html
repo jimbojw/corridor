@@ -228,7 +228,7 @@
               "plain": "string"
             },
             "nested-include": "Only text, include it!",
-            "explicit-include": "This value <I>is</I> included."
+            "explicit-include": "This value is included."
           }
         </script>
         
@@ -243,7 +243,7 @@
             This value is not included because of the explicit include=never.
           </p>
           <p data-name="nested-include">Only text, include it!</p>
-          <p data-name="explicit-include" data-include="always">This value <I>is</I> included.</p>
+          <p data-name="explicit-include" data-include="always">This value is included.</p>
         </div>
         
       </div>
@@ -348,7 +348,7 @@
               "plain": "string"
             },
             "nested-include": "Only text, include it!",
-            "explicit-include": "This value <I>is</I> included."
+            "explicit-include": "This value is included."
           }
         </script>
         
@@ -361,6 +361,108 @@
           <p data-name="nested-include"></p>
           <p data-name="explicit-include" data-include="always">Schwuh?</p>
         </div>
+        
+      </div>
+      
+      <div class="test" id="expand table">
+        
+        <script type="application/json">
+          {
+            "company": {
+              "employees": [{
+                "name": "Bob",
+                "email": "bob@company.com"
+              },{
+                "name": "Alice",
+                "email": "alice@company.com"
+              },{
+                "name": "Cynthia",
+                "email": "cynthia@company.com"
+              }]
+            }
+          }
+        </script>
+        
+        <div>
+          <table>
+            <tr data-name="company.employees[]">
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+          </table>
+        </div>
+        
+        <script type="application/json" class="options">
+          {
+            "expand": "always"
+          }
+        </script>
+        
+      </div>
+      
+      <div class="test" id="expand list">
+        
+        <script type="application/json">
+          {
+            "animalsounds": [
+              "moo",
+              "woof",
+              "ow-ow-ow",
+              "meow",
+              "Aooo-ooo-oo-ooo"
+            ]
+          }
+        </script>
+        
+        <div>
+          <ul data-name="animalsounds">
+            <li><input name="[]" data-expand="always"/></li>
+          </ul>
+        </div>
+        
+      </div>
+      
+      <div class="test" id="don't expand table">
+        
+        <script type="application/json">
+          {
+            "company": {
+              "employees": [{
+                "name": "Bob",
+                "email": "bob@company.com"
+              },{
+                "name": "Alice",
+                "email": "alice@company.com"
+              },{
+                "name": "Cynthia",
+                "email": "cynthia@company.com"
+              }]
+            }
+          }
+        </script>
+        
+        <div>
+          <table data-name="company.employees[]" data-expand="never">
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+          </table>
+        </div>
+        
+        <script type="application/json" class="options">
+          {
+            "expand": "always"
+          }
+        </script>
         
       </div>
       
@@ -378,6 +480,7 @@ window.exports = {};
 </script>
 <script src="test-available.js"></script>
 <script src="test-arrayify.js"></script>
+<script src="test-clone.js"></script>
 <script src="test-merge.js"></script>
 <script src="test-convertname.js"></script>
 <script src="test-arraylike.js"></script>
@@ -441,15 +544,19 @@ QUnit.test('integration — insert()', function() {
       
       var 
         script = test.querySelector('script'),
+        opts = test.querySelector('.options'),
         root = test.querySelector('div'),
         original = JSON.parse(script.textContent || script.innerText || script.innerHTML),
         actual;
       
+      opts = opts ? opts.textContent || opts.innerText || opts.innerHTML || '' : '';
+      opts = JSON.parse(opts || '{}');
+      
       // insert data with corridor
-      corridor(root, original);
+      corridor(root, original, opts);
       
       // extract it back out again
-      actual = corridor(root);
+      actual = corridor(root, null, opts);
       
       QUnit.deepEqual(actual, original, test.id);
       
