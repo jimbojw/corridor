@@ -138,18 +138,16 @@ var
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
     }
-      
+    
     fields.forEach(function(elem) {
       
       var
         opts = options(elem, settings),
         value = val(elem),
-        contrib,
-        field;
-      
-      // build out full contribution
-      contrib = buildup("\ufffc", elem, root);
-      field = contrib.split("\ufffc").join('$$$');
+        
+        // build out full contribution
+        contrib = buildup("\ufffc", elem, root),
+        field = contrib.split("\ufffc").join('$$$');
       
       // short-circuit if this field should be omitted
       if (!value && !includeEmpty(field, elem, opts)) {
@@ -292,29 +290,35 @@ var
         sibling,
         cloneElem;
       
+      // find array in the data that maps to this candidate
       arry = follow(candidate.path, data);
+      if (!arry || !arry.length) {
+        return;
+      }
       
       // compare length of elems to data mapped array to determine shortfall
       shortfall = arry.length - candidate.elems.length;
+      if (shortfall === 0) {
+        return;
+      }
       
       // choose best element for clone target
       target = findExpandTarget(candidate.elems[candidate.elems.length - 1], root, settings);
+      if (!target) {
+        return;
+      }
       
-      if (target && shortfall > 0) {
+      sibling = target.nextSibling;
+      parent = target.parentNode;
+      
+      // clone last element N times
+      while (shortfall--) {
         
-        sibling = target.nextSibling;
-        parent = target.parentNode;
+        cloneElem = target.cloneNode();
+        cloneElem.innerHTML = target.innerHTML;
         
-        // clone last element N times
-        while (shortfall--) {
-          
-          cloneElem = target.cloneNode();
-          cloneElem.innerHTML = target.innerHTML;
-          
-          parent.insertBefore(cloneElem, sibling);
-          sibling = cloneElem.nextSibling;
-          
-        }
+        parent.insertBefore(cloneElem, sibling);
+        sibling = cloneElem.nextSibling;
         
       }
       
