@@ -7,7 +7,7 @@ Bi-directional data binding without the fuss.
 ## why you need corridor
 
 Your data is in JSON, but your users interact with HTML.
-corridor's shuttles your data between your JSON and your HTML.
+corridor shuttles your data between your JSON and your HTML.
 
 In a nutshell, corridor lets you turn this:
 
