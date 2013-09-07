@@ -422,6 +422,50 @@
         
       </div>
       
+      <div class="test" id="don't expand table">
+        
+        <script type="application/json">
+          {
+            "company": {
+              "employees": [{
+                "name": "Bob",
+                "email": "bob@company.com"
+              },{
+                "name": "Alice",
+                "email": "alice@company.com"
+              },{
+                "name": "Cynthia",
+                "email": "cynthia@company.com"
+              }]
+            }
+          }
+        </script>
+        
+        <div>
+          <table data-name="company.employees[]" data-expand="never">
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+            <tr>
+              <td><input type="text" name="name" /></td>
+              <td><input type="text" name="email" /></td>
+            </tr>
+          </table>
+        </div>
+        
+        <script type="application/json" class="options">
+          {
+            "expand": "always"
+          }
+        </script>
+        
+      </div>
+      
     </div><!-- /insert-tests -->
     
   </div><!-- /corridor-fixture -->
