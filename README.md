@@ -7,9 +7,9 @@ Bi-directional data binding without the fuss.
 ## why you need corridor
 
 Your data is in JSON, but your users interact with HTML.
-corridor's only mission is to shuttle your data between your JSON and your HTML.
+corridor's shuttles your data between your JSON and your HTML.
 
-In a nutshell, corridor gives you the power to turn this:
+In a nutshell, corridor lets you turn this:
 
 ```html
 <fieldset name="project">
@@ -47,9 +47,9 @@ Read the tutorial to get started, or skip to the API section for the details.
 
 The corridor project philosophy boils down to these points:
 
- * **unobtrusive** — corridor presents just one function, has no dependencies, and causes no side-effects.
- * **intelligent** — corridor learns what to do by looking at the data, not by being told (except where you want to).
- * **clear** — corridor's code, functionality, tests, milestones and issues are all well documented and easy to follow.
+ * **intelligent** — it learns what to do by looking at the data on the ground.
+ * **unobtrusive** — it's just one function, without dependencies or side-effects.
+ * **clear** — corridor's code, tests, and issues are crisply documented.
 
 Development of features, bugfixes and documentation are held to these ideals.
 
@@ -413,7 +413,8 @@ In each case, the toggle that controls the toggleable container is the nearest c
 
 ### inserting data
 
-This tutorial has focused largely on explaining how data flows from HTML to JSON, but corridor is great at sending data the other way as well.
+So far, this tutorial has focused on explaining how data flows from HTML to JSON.
+But corridor is great at sending data the other way as well.
 
 To insert data back into the DOM, call the corridor function with a root element and a data structure object.
 
@@ -425,6 +426,71 @@ corridor(document.body, {
 ```
 
 corridor uses the same `name` and `data-*` attributes to determine where data values should be inserted.
+
+### expanding to fit
+
+When you send data from JSON into HTML, there's a chance that there won't be enough room.
+This is especilly true when working with arrays.
+
+Consider this input JSON:
+
+```js
+{
+  "company": {
+    "employees": [{
+      "name": "Bob",
+      "email": "bob@company.com"
+    },{
+      "name": "Alice",
+      "email": "alice@company.com"
+    }]
+  }
+}
+```
+
+And this HTML:
+
+```html
+<table>
+  <tr data-name="company.employees[]">
+    <td><input type="text" name="name" /></td>
+    <td><input type="text" name="email" /></td>
+  </tr>
+</table>
+```
+
+If you ran corridor in insert mode in this scenario, Alice would be lost since there's only one row for `company.employees`.
+
+Fortunately, corridor can expand the DOM for you to make room for the extra elements.
+If you set `data-expand` to `auto` on a named element, corridor will duplicate it to make room for data that otherwise wouldn't fit.
+
+Here's the same example again, with the `data-expand` attribute set:
+
+```html
+<table>
+  <tr data-name="company.employees[]" data-expand="auto">
+    <td><input type="text" name="name" /></td>
+    <td><input type="text" name="email" /></td>
+  </tr>
+</table>
+```
+
+After calling `corridor(table, data)`, the HTML in the page will look like this:
+
+```html
+<table>
+  <tr data-name="company.employees[]" data-expand="auto">
+    <td><input type="text" name="name" value="Bob" /></td>
+    <td><input type="text" name="email" value="bob@company.com" /></td>
+  </tr>
+  <tr data-name="company.employees[]" data-expand="auto">
+    <td><input type="text" name="name" value="Alice" /></td>
+    <td><input type="text" name="email" value="alice@company.com" /></td>
+  </tr>
+</table>
+```
+
+Since the expand feature is more intrusive in its side-effects in the DOM, you must enable it explicitly either by setting the `data-enabled` option, or in the options argument to the `corridor()` function.
 
 ## corridor API
 
