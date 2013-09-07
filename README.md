@@ -576,7 +576,7 @@ For example, the `enabledOnly` property controls whether corridor will operate o
 By default `enabledOnly` is set to `true`, meaning only enabled fields are included.
 You could set `enabledOnly` to `false` in the opts hash to tell corridor to ignore the effects of toggleables.
 
-Options that apply to any field are:
+Available options are:
 
  * `type` - the type of the field (_auto_, _string_, _boolean_, _number_, _list_, or _json_)
  * `empty` - whether to include the value in the output if the field is empty (_auto_, _include_, or _omit_)
@@ -584,8 +584,9 @@ Options that apply to any field are:
  * `include` - whether a non-form element should be considered for insert/extract (_auto_, _always_, or _never_)
  * `extract` - strategy for pulling a value from a non-form element when extracting (_auto_, _value_, _text_, or _html_)
  * `insert` - strategy for putting a value into a non-form element when inserting (_auto_, _value_, _text_, or _html_)
-
-The `role` and `enabledOnly` options apply only to toggleable/toggle functionality.
+ * `expand` - whether to expand the DOM to accomodate data that otherwise wouldn't fit (_never_, _auto_)
+ * `role` - what role this element plays (_field_, _toggleable_, _toggle_, _expand_)
+ * `enabledOnly` - only include enabled elements for consideration during insert/extract (_true_, _false_)
 
 Note that setting options via the `opts` param specifically affects the execution of the corridor function just once.
 Persistent options should be stored in the HTML.
@@ -597,12 +598,12 @@ The type determines how corridor converts the string value of the form element i
 
 The recognized types are:
 
- * _auto_ - automatically detect the correct type based on the value (default)
- * _string_ - treat the value as a string
- * _boolean_ - coerce this value to something true/false
- * _number_ - parse this value as a number
- * _json_ - leave this value as-is (will choke if it's not actually valid JSON)
- * _list_ - parse this value as a list of values
+ * `auto` - automatically detect the correct type based on the value (default)
+ * `string` - treat the value as a string
+ * `boolean` - coerce this value to something true/false
+ * `number` - parse this value as a number
+ * `json` - leave this value as-is (will choke if it's not actually valid JSON)
+ * `list` - parse this value as a list of values
 
 When automatically detecting the type, corridor uses the following algorithm:
 
@@ -618,9 +619,9 @@ The `empty` option indicates whether the value should be included in the output 
 
 Choices are:
 
- * _auto_ - automatically detect the appropriate behavior based on the circumstances (default)
- * _include_ - include the value in the output (default)
- * _omit_ - do not add the field at all
+ * `auto` - automatically detect the appropriate behavior based on the circumstances (default)
+ * `include` - include the value in the output (default)
+ * `omit` - do not add the field at all
 
 When empty is set to `auto`, corridor uses the following algorithm to between `include` and `omit`:
 
@@ -637,9 +638,9 @@ The `merge` option indicates which merging strategy corridor should use when mer
 
 Choices are:
 
- * _auto_ - intelligently choose whether to concatenate the arrays, or deep merge them (default)
- * _concat_ - concatenate the arrays
- * _extend_ - deep merge each pair of items
+ * `auto` - intelligently choose whether to concatenate the arrays, or deep merge them (default)
+ * `concat` - concatenate the arrays
+ * `extend` - deep merge each pair of items
 
 When in `auto` mode, the algorithm for choosing whether to concatenate or merge two arrays should work as follows:
 
@@ -670,9 +671,9 @@ The `include` option indicates whether a non-form element should be considered f
 
 Choices are:
 
- * _auto_ - intelligently choose whether to include the element (default).
- * _always_ - always include the element.
- * _never_ - never include the element.
+ * `auto` - intelligently choose whether to include the element (default).
+ * `always` - always include the element.
+ * `never` - never include the element.
 
 When operating in _auto_ mode, corridor uses the following algorithm to decide whether a non-form element should be considered for insert/extract:
 
@@ -688,10 +689,10 @@ The `extract` option indicates how a value should be extracted from an element u
 
 Choices are:
 
- * _auto_ - intelligently choose the best way to get a value (default).
- * _value_ - get the element's form value (`value` attribute, except for `<select>` elements).
- * _text_ - get the element's `textContent`.
- * _html_ - get the element's `innerHTML`.
+ * `auto` - intelligently choose the best way to get a value (default).
+ * `value` - get the element's form value (`value` attribute, except for `<select>` elements).
+ * `text` - get the element's `textContent`.
+ * `html` - get the element's `innerHTML`.
 
 When operating in _auto_ mode, corridor uses the following algorithm to decide how to extract a value:
 
@@ -709,10 +710,10 @@ The `insert` option indicates how a value should be inserted into an element und
 
 Choices are:
 
- * _auto_ - intelligently choose the best way to insert the value (default).
- * _value_ - set the element's form value (`value` attribute, except for `<select>` elements).
- * _text_ - set the element's `textContent`.
- * _html_ - set the element's `innerHTML`.
+ * `auto` - intelligently choose the best way to insert the value (default).
+ * `value` - set the element's form value (`value` attribute, except for `<select>` elements).
+ * `text` - set the element's `textContent`.
+ * `html` - set the element's `innerHTML`.
 
 When operating in _auto_ mode, corridor uses the following algorithm to decide how to insert a value:
 
@@ -723,6 +724,49 @@ When operating in _auto_ mode, corridor uses the following algorithm to decide h
 
 If you set the insert option, it's much better to set it in the HTML specifically for a particular element.
 Most of the time, you'll want the _auto_ detection.
+
+##### expand option
+
+The `expand` option indicates whether corridor should make any attempt to expand the DOM to accomodate data that otherwise wouldn't fit.
+
+Choices are:
+
+ * `never` - do not add any elements to the DOM (default).
+ * `auto` - intelligently choose the best way to expand the DOM if necessary.
+
+When operating in _auto_ mode, corridor uses the following algorithm to decide how to expand the DOM:
+
+ * identify candidates for expansion; these are elements which:
+  - have a `name` or `data-name` attribute,
+  - don't a `data-expand` value of `never`,
+  - have a name format that ends in `[]`,
+  - are not the children of such an element (the algorithm does _not_ recurse)
+ * for each set of candidates:
+  - find the matching array from the source data,
+  - if there source data array and list of candidate fields have the same length, abort, otherwise,
+  - find the best target to clone, then,
+  - create N clone siblings of the target, appending each sequentially to the target's parent element, where N is the difference between the data array length and the length of the list of candidate elements.
+
+The algorithm for finding a clone target for a set of candidate elements is:
+
+ * start with the last element in the list of candidates (called `elem` here),
+ * if that element is not a value'd form field:
+  - check for a child with `data-role` set to `expand`, if found, use it
+ * if the element `elem` is a value'd form field:
+  - walk up the DOM looking for a parent with `data-role` set to `expand`, if found, use it, otherwise,
+  - walk up the DOM looking for either a `<li>` element or a `<tr>`, if found, use it
+ * last resort, use the element `elem`
+
+Known limitations:
+
+ * Only the last candidate element is searched for a target to clone. It's not round-robin or based on the content of the data array.
+ * The shortfall is calculated from the element which starts the process, not the target element.
+ * The algorithm doesn't recurse, so nested expand elements will not be expanded.
+
+Improving on these limitations will require a major update to the code base to include an intermediate tree structure.
+This tree structure would provide the rich information necessary to make more intelligent auto-expand decisions.
+
+See [Issue #39](https://github.com/jimbojw/corridor/issues/39).
 
 ##### toggle options
 
@@ -864,6 +908,8 @@ However, if your JSON is quite complex, you may need to use field format for som
 
 #### field format
 
+_Note: field format will probably be removed in a future version of corridor_
+
 Whereas name format resembles how you'd _access_ an object in JavaScript, field format resembles how you describe an object in JavaScript—that is, JSON.
 
 With field format, you specify how your data should appear as properly formatted JSON.
@@ -882,8 +928,7 @@ Here are some name format strings and their field format equivalents:
  * `[]` &rarr; `[$$$]`
  * `a.b.c` &rarr; `{"a":{"b":{"c":$$$}}}`
 
-When possible, you should use the name format for your name attributes.
-But there are some rare cases where field format is the better option.
+You should use the name format for your name attributes.
 
 #### data-opts attribute
 

@@ -276,19 +276,10 @@ var
     
     keys(candidates).forEach(function(field){
       
-      var
-        
-        // grab candidate
-        candidate = candidates[field],
-        
-        // grab matching array from input data
-        arry = follow(candidate.path, data),
-        
-        shortfall,
-        target,
-        parent,
-        sibling,
-        cloneElem;
+      var candidate, arry, shortfall, target, parent, sibling, cloneElem;
+      
+      // grab candidate
+      candidate = candidates[field];
       
       // find array in the data that maps to this candidate
       arry = follow(candidate.path, data);
@@ -402,7 +393,6 @@ var
      * Strategy for expanding the DOM to accomodate arrays of data.
      *  - never - do not modify the DOM to try and accomodate data (default)
      *  - auto - intelligently decide whether to expand based on circumstances
-     *  - always - when a shortfall is detected, expand the DOM
      */
     expand: 'never'
     
