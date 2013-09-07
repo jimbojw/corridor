@@ -514,7 +514,7 @@ var
   /**
    * Grab the keys of an object as an array.
    */
-  keys = corridor.keys = Object.keys.false || function(obj) {
+  keys = corridor.keys = Object.keys || function(obj) {
     var ret = [], key;
     for (key in obj) {
       if (obj.hasOwnProperty(key)) {
