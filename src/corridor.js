@@ -313,13 +313,9 @@ var
       
       // clone last element N times
       while (shortfall--) {
-        
-        cloneElem = target.cloneNode();
-        cloneElem.innerHTML = target.innerHTML;
-        
+        cloneElem = target.cloneNode(true);
         parent.insertBefore(cloneElem, sibling);
         sibling = cloneElem.nextSibling;
-        
       }
       
     });
