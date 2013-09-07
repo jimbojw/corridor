@@ -138,18 +138,16 @@ var
     if (settings.enabledOnly) {
       fields = fields.filter(enabled);
     }
-      
+    
     fields.forEach(function(elem) {
       
       var
         opts = options(elem, settings),
         value = val(elem),
-        contrib,
-        field;
-      
-      // build out full contribution
-      contrib = buildup("\ufffc", elem, root);
-      field = contrib.split("\ufffc").join('$$$');
+        
+        // build out full contribution
+        contrib = buildup("\ufffc", elem, root),
+        field = contrib.split("\ufffc").join('$$$');
       
       // short-circuit if this field should be omitted
       if (!value && !includeEmpty(field, elem, opts)) {
@@ -186,6 +184,9 @@ var
     if (!root) {
       throw Error('corridor requires a queryable root element to insert data into');
     }
+    
+    // expand DOM to fit data
+    expand(root, data, opts);
     
     var
       
@@ -260,6 +261,59 @@ var
   },
   
   /**
+   * Expand the DOM to fit the supplied data.
+   * @param {HTMLElement} root The element to scan for insertion fields (optional).
+   * @param {mixed} data The data to insert.
+   * @param {object} opts Hash of options (optional, see corridor options)
+   */
+  expand = corridor.expand = function(root, data, opts) {
+    
+    var
+      settings = options(root, extend({}, defaults, opts)),
+      
+      // search for candidates to expand
+      candidates = findExpandCandidates(root, settings);
+    
+    keys(candidates).forEach(function(field){
+      
+      var candidate, arry, shortfall, target, parent, sibling, cloneElem;
+      
+      // grab candidate
+      candidate = candidates[field];
+      
+      // find array in the data that maps to this candidate
+      arry = follow(candidate.path, data);
+      if (!arry || !arry.length) {
+        return;
+      }
+      
+      // compare length of elems to data mapped array to determine shortfall
+      shortfall = arry.length - candidate.elems.length;
+      if (shortfall === 0) {
+        return;
+      }
+      
+      // choose best element for clone target
+      target = findExpandTarget(candidate.elems[candidate.elems.length - 1], root, settings);
+      if (!target) {
+        return;
+      }
+      
+      sibling = target.nextSibling;
+      parent = target.parentNode;
+      
+      // clone last element N times
+      while (shortfall--) {
+        cloneElem = target.cloneNode(true);
+        parent.insertBefore(cloneElem, sibling);
+        sibling = cloneElem.nextSibling;
+      }
+      
+    });
+    
+  },
+  
+  /**
    * Default values applied to options.
    */
   defaults = corridor.defaults = {
@@ -279,6 +333,7 @@ var
      *  - field - this element is a field whose value will contribute to extracted data (default)
      *  - toggleable - this element contains fields and may be toggled on or off
      *  - toggle - this element is a checkbox which toggles its nearest parent toggleable
+     *  - expand - this element is meant to be expanded (cloned) to accomodate data in the case of a shortfall
      */
     role: "field",
     
@@ -332,8 +387,127 @@ var
      *  - text - set the element's textContent
      *  - html - set the element's innerHTML
      */
-    insert: 'auto'
+    insert: 'auto',
     
+    /**
+     * Strategy for expanding the DOM to accomodate arrays of data.
+     *  - never - do not modify the DOM to try and accomodate data (default)
+     *  - auto - intelligently decide whether to expand based on circumstances
+     */
+    expand: 'never'
+    
+  },
+  
+  /**
+   * Given an element, find candidates for DOM expanssion.
+   * Once a candidate is found, it is not recursively searched.
+   * @param {HTMLElement} root The element to start from.
+   * @param {object} opts Options (optional).
+   */
+  findExpandCandidates = corridor.expand.findExpandCandidates = function(root, opts) {
+    
+    var
+      settings = extend({}, defaults, opts),
+      queue = [root],
+      candidates = {},
+      ufc = JSON.stringify("\ufffc"),
+      
+      // iteration vars
+      elem, field, path, candidate;
+    
+    while (queue.length) {
+      elem = queue.shift();
+      if (elem.hasAttribute('name') || elem.hasAttribute('data-name')) {
+        if (options(elem, settings).expand !== 'never') {
+          field = buildup(ufc, elem, root);
+          if (field.indexOf("["+ufc+"]") !== -1) {
+            path = locate(JSON.parse(field), "\ufffc").slice(0, -1);
+            candidate = candidates[field];
+            if (!candidate) {
+              candidate = candidates[field] = {
+                path: path,
+                elems: []
+              };
+            }
+            candidate.elems.push(elem);
+          }
+        }
+      }
+      arrayify(elem.childNodes).forEach(function(child) {
+        if (child.nodeType === 1) {
+          queue.push(child);
+        }
+      });
+    }
+    
+    return candidates;
+    
+  },
+  
+  /**
+   * Given an element, intelligently find the best choice for DOM expanssion.
+   * @param {HTMLElement} elem The element to start from.
+   * @param {HTMLElement} root The highest element to consider.
+   * @param {object} opts Options (optional).
+   */
+  findExpandTarget = corridor.expand.findExpandTarget = function(elem, root, opts) {
+    
+    var target;
+    
+    // non-value'd elements inspect downwards
+    if (!hasVal(elem)) {
+      
+      // check for child with the data-role expand
+      target = null;
+      arrayify(elem.querySelectorAll('[data-role], [data-opts]'))
+        .forEach(function(child) {
+          if (!target) {
+            if (options(child).role === 'expand') {
+              target = child;
+            }
+          }
+        });
+      
+      return target || elem;
+      
+    }
+    
+    // walk up the DOM looking for an ancestor with the exand role
+    target = null;
+    upwalk(elem, root, function(parent, field, opts){
+      if (opts.role === 'expand') {
+        target = parent;
+        return false;
+      }
+    });
+    if (target) {
+      return target;
+    }
+    
+    // if there are no ancestors with role expand, look for special elements
+    var node = elem;
+    while (node) {
+      if ((/^(tr|li)$/i).test(node.tagName)) {
+        return node;
+      }
+      node = node === root ? null : node.parentNode;
+    }
+    
+    // couldn't find a better target than the element itself
+    return elem;
+  },
+  
+  /**
+   * Grab the keys of an object as an array.
+   */
+  keys = corridor.keys = Object.keys || function(obj) {
+    var ret = [], key;
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        ret.push(key);
+      }
+    }
+    return arrayify(ret);
   },
   
   /**
@@ -501,6 +675,7 @@ var
    * @return {mixed} The final node at the bottom of the path if discoverable.
    */
   follow = corridor.follow = function(path, node) {
+    path = path.slice(0);
     while (node && path.length) {
       node = node[path.shift()];
     }
@@ -812,7 +987,7 @@ var
    * @param {HTMLElement} elem The element to test.
    */
   isValued = val.isValued = function(elem) {
-    return (/^(input|textarea|select)$/i).test(elem.tagName) || 'value' in elem;
+    return (/^(input|textarea|select)$/i).test(elem.tagName);
   },
   
   /**
@@ -991,6 +1166,15 @@ var
     
     return true;
     
+  },
+  
+  /**
+   * Create a deep clone of a plain object.
+   * @param {mixed} obj The object to clone.
+   * @return {mixed} A deep clone of the original object.
+   */
+  clone = corridor.clone = function(obj) {
+    return JSON.parse(JSON.stringify(obj));
   };
 
 }).apply(null,
