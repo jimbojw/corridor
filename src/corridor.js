@@ -194,7 +194,7 @@ var
       
       // data structure for existing fields
       // used to figure out true contribution paths for inserting data into elements
-      workspace = {},
+      workspace = arraylike(data) ? [] : {},
       
       fields = selectFields(root, settings)
         .filter(function(elem) {
