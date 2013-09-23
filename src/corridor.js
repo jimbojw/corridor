@@ -129,7 +129,7 @@ var
     
     var
       settings = extend({}, defaults, opts),
-      data = {},
+      data = undefined,
       fields = selectFields(root, settings)
         .filter(function(elem) {
           return hasVal(elem, settings);
@@ -161,7 +161,11 @@ var
       value = contrib.replace("\ufffc", value);
       
       // merge contribution into the result data
-      merge(data, JSON.parse(value));
+      value = JSON.parse(value);
+      if (data === undefined) {
+        data = arraylike(value) ? [] : {};
+      }
+      data = merge(data, value);
       
     });
     
@@ -194,7 +198,7 @@ var
       
       // data structure for existing fields
       // used to figure out true contribution paths for inserting data into elements
-      workspace = {},
+      workspace = arraylike(data) ? [] : {},
       
       fields = selectFields(root, settings)
         .filter(function(elem) {
@@ -216,7 +220,7 @@ var
         target = JSON.parse(buildup(JSON.stringify("\ufffc"), elem, root));
         
         // insert into workspace
-        merge(workspace, target);
+        workspace = merge(workspace, target);
         
         // find path to target in workspace
         path = locate(workspace, "\ufffc");
