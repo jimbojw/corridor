@@ -490,7 +490,7 @@ After calling `corridor(table, data)`, the HTML in the page will look like this:
 </table>
 ```
 
-Since the expand feature is more intrusive in its side-effects in the DOM, you must enable it explicitly either by setting the `data-enabled` option, or in the options argument to the `corridor()` function.
+Since the expand feature is more intrusive in its side-effects in the DOM, you must enable it explicitly either by setting the `data-expand` option, or in the options argument to the `corridor()` function.
 
 ## corridor API
 
