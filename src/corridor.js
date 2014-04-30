@@ -1140,7 +1140,7 @@ var
       return false;
     }
     
-    if (('length' in obj) && !posInt.test(obj.length)) {
+    if (!('length' in obj) || ('length' in obj) && !posInt.test(obj.length)) {
       return false;
     }
     
