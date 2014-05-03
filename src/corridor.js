@@ -1028,7 +1028,7 @@ var
     
     var
       strategy = defaults.merge,
-      i, ii, key, tmp;
+      i, ii, key, tmp, type;
     
     if (opts && 'merge' in opts) {
       strategy = opts.merge;
@@ -1075,8 +1075,13 @@ var
         obj = tmp;
       }
       for (key in other) {
-        if (key in obj && typeof obj[key] === 'object' && obj[key] !== null) {
-          obj[key] = merge(obj[key], other[key], opts);
+        if (key in obj && typeof obj[key] === 'object' && obj[key] !== null && typeof other[key] === 'object') {
+          type = toString.call(other[key]);
+          if (type === '[object Array]' || type === '[object Object]') {
+            obj[key] = merge(obj[key], other[key], opts);
+          } else {
+            obj[key] = other[key];
+          }
         } else {
           obj[key] = other[key];
         }

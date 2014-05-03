@@ -15,6 +15,10 @@ exports['corridor.arraylike()'] = function(test) {
       expected: false,
       reason: 'a primitive value is not array-like'
     },{
+      obj: new String('hi'),
+      expected: false,
+      reason: 'a wrapped primitive value is not array-like'
+    },{
       obj: ['hi'],
       expected: true,
       reason: 'an array is array-like'

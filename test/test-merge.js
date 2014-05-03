@@ -27,6 +27,11 @@ exports['corridor.merge(objects)'] = function(test) {
       other: { "person": { "name": "Alice" } },
       expected: { "person": { "name": "Alice" } },
       reason: 'nested conflicting objects should have their keys take precidence'
+    },{
+      obj: { "person": { "name": "original" } },
+      other: { "person": { "name": new String("other") } },
+      expected: { "person": { "name": "other" } },
+      reason: 'wrapped primitives should be coerced to native primitives'
     }];
   
   test.expect(suite.length);
@@ -114,6 +119,31 @@ exports['corridor.merge(mismatch)'] = function(test) {
       other: {"deep":{"foo":"bar"}},
       expected: {"deep":{0:"baz","foo":"bar"}},
       reason: 'merging a non-array-like sub-key into an array should objectify the array'
+    },{
+      obj: {"foo":[]},
+      other: {"foo":"bar"},
+      expected: {"foo":"bar"},
+      reason: 'a primitive value should replace an array when mismatched in an object'
+    },{
+      obj: {"foo":[]},
+      other: {"foo":new String("bar")},
+      expected: {"foo":"bar"},
+      reason: 'a wrapped primitive value should replace an array when mismatched in an object'
+    },{
+      obj: {"foo":{"baz":5}},
+      other: {"foo":"bar"},
+      expected: {"foo":"bar"},
+      reason: 'a primitive value should replace an object when mismatched in an object'
+    },{
+      obj: {"foo":"bar"},
+      other: {"foo":[]},
+      expected: {"foo":[]},
+      reason: 'an array value should replace a primitive when mismatched in an object'
+    },{
+      obj: {"foo":"bar"},
+      other: {"foo":{"baz":5}},
+      expected: {"foo":{"baz":5}},
+      reason: 'an object should replace a primitive value when mismatched in an object'
     }];
   
   test.expect(suite.length);
