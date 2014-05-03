@@ -110,6 +110,11 @@ exports['corridor.merge(mismatch)'] = function(test) {
       expected: {"foo":"bar",0:"baz"},
       reason: 'an array should contribute numeric keys to an object'
     },{
+      obj: {0:[]},
+      other: ["baz"],
+      expected: {0:"baz"},
+      reason: 'an array should contribute numeric keys to an object, and overwrite on type mismatch'
+    },{
       obj: ['baz'],
       other: {"foo":"bar"},
       expected: {0:"baz","foo":"bar"},

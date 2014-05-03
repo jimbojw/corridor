@@ -1059,8 +1059,13 @@ var
         }
       } else {
         for (i = 0, ii = other.length; i < ii; i++) {
-          if (i in obj && typeof obj[i] === 'object' && obj[i] !== null) {
-            obj[i] = merge(obj[i], other[i], opts);
+          if (i in obj && typeof obj[i] === 'object' && obj[i] !== null && typeof other[i] === 'object') {
+            type = toString.call(other[i]);
+            if (type === '[object Array]' || type === '[object Object]') {
+              obj[i] = merge(obj[i], other[i], opts);
+            } else {
+              obj[i] = other[i];
+            }
           } else {
             obj[i] = other[i];
           }
