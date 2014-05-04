@@ -93,7 +93,7 @@ exports['corridor.merge(arrays)'] = function(test) {
   
 };
 
-exports['corridor.merge(mismatch)'] = function(test) {
+exports['corridor.merge(arraylike)'] = function(test) {
   
   var
     
@@ -103,8 +103,34 @@ exports['corridor.merge(mismatch)'] = function(test) {
       obj: ['a'],
       other: {0:'b'},
       expected: ['a', 'b'],
-      reason: 'arraylike objects should behave like arrays for merging'
+      reason: 'arraylike objects should contribute to arrays when merging'
     },{
+      obj: {"a":"b", 0:{"foo":"bar"}},
+      other: {0:{"foo":"baz"}, 1:"c"},
+      expected: {"a":"b", 0:{"foo":"baz"}, 1:"c"},
+      reason: 'arraylike objects should merge into objects like objects'
+    }];
+
+  test.expect(suite.length);
+
+  for (var i = 0, ii = suite.length; i < ii; i++) {
+    (function(data){
+      var actual = corridor.merge(data.obj, data.other);
+      test.equals(JSON.stringify(actual), JSON.stringify(data.expected), data.reason);
+    })(suite[i]);
+  }
+
+  test.done();
+
+};
+
+exports['corridor.merge(mismatch)'] = function(test) {
+
+  var
+
+    corridor = require('../src/corridor.js'),
+
+    suite = [{
       obj: {"foo":"bar"},
       other: ["baz"],
       expected: {"foo":"bar",0:"baz"},

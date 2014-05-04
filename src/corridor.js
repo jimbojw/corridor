@@ -1028,25 +1028,26 @@ var
     
     var
       strategy = defaults.merge,
-      i, ii, key, tmp, type;
+      i, ii, key, otherLength, tmp, type;
     
     if (opts && 'merge' in opts) {
       strategy = opts.merge;
     }
     
     if (arraylike(other)) {
+      otherLength = getLength(other);
       if (toString.call(obj) === '[object Array]') {
         if (strategy === 'concat') {
-          for (i = 0, ii = other.length; i < ii; i++) {
+          for (i = 0; i < otherLength; i++) {
             obj.push(other[i]);
           }
         } else if (strategy === 'extend') {
-          for (i = 0, ii = other.length; i < ii; i++) {
+          for (i = 0; i < otherLength; i++) {
             obj[i] = merge(obj[i], other[i], opts);
           }
         } else {
-          if (!obj.length || other.length > 1) {
-            for (i = 0, ii = other.length; i < ii; i++) {
+          if (!obj.length || otherLength > 1) {
+            for (i = 0; i < otherLength; i++) {
               obj.push(other[i]);
             }
           } else {
@@ -1058,7 +1059,7 @@ var
           }
         }
       } else {
-        for (i = 0, ii = other.length; i < ii; i++) {
+        for (i = 0; i < otherLength; i++) {
           if (i in obj && typeof obj[i] === 'object' && obj[i] !== null && typeof other[i] === 'object') {
             type = toString.call(other[i]);
             if (type === '[object Array]' || type === '[object Object]') {
@@ -1180,6 +1181,28 @@ var
     
     return true;
     
+  },
+
+  /**
+   * Determine the length of an arraylike object by either returning its length
+   * property or counting its keys.
+   * @param {mixed} obj The object whose length is to be determined.
+   * @param {number} The length of the arraylike object.
+   */
+  getLength = arraylike.getLength = function(obj) {
+
+    if ('length' in obj) {
+      return obj.length;
+    }
+
+    var length = 0, k;
+
+    for (k in obj) {
+      length++;
+    }
+
+    return length;
+
   },
   
   /**
