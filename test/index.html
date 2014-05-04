@@ -248,6 +248,40 @@
         
       </div>
       
+      <div class="test" id="arraylike nested values">
+        
+        <script type="application/json">
+          {
+            "obj": {
+              "0": {
+                "foo": "bar",
+                "style": {
+                  "color": "black",
+                  "width": "100%"
+                }
+              },
+              "1": {
+                "foo": "baz",
+                "style": {
+                  "color": "blue",
+                  "width": "300px"
+                }
+              }
+            }
+          }
+        </script>
+        
+        <div>
+          <input name="obj.0.foo" value="bar" />
+          <input name="obj.0.style.color" value="black" />
+          <input name="obj.0.style.width" value="100%" />
+          <input name="obj.1.foo" value="baz" />
+          <input name="obj.1.style.color" value="blue" />
+          <input name="obj.1.style.width" value="300px" />
+        </div>
+        
+      </div>
+      
     </div><!-- /extract tests -->
     
     <div id="insert-tests">
