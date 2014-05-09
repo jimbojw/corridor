@@ -550,6 +550,29 @@
         
       </div>
       
+      <div class="test" id="insert to checkbox">
+        
+        <script type="application/json">
+          [{
+            "enabled": true
+          },{
+            "enabled": true
+          },{
+            "enabled": false
+          },{
+            "enabled": false
+          }]
+        </script>
+        
+        <div>
+          <input type="checkbox" name="[]enabled" data-empty="include" checked />
+          <input type="checkbox" name="[]enabled" data-empty="include" />
+          <input type="checkbox" name="[]enabled" data-empty="include" checked />
+          <input type="checkbox" name="[]enabled" data-empty="include" />
+        </div>
+
+      </div>
+
     </div><!-- /insert-tests -->
     
   </div><!-- /corridor-fixture -->
