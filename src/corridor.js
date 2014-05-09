@@ -941,19 +941,32 @@ var
   setVal = val.setVal = function(elem, value, opts) {
     opts = options(elem, extend({}, defaults, opts));
     if (opts.insert === 'value') {
-      elem.value = value;
+      setFormVal(elem, value);
     } else if (opts.insert === 'text') {
       setText(elem, value);
     } else if (opts.insert === 'html') {
       elem.innerHTML = value;
     } else if (isValued(elem)) {
-      elem.value = value;
+      setFormVal(elem, value);
     } else if (!(/<(\w+)\b[^>]*>/i).test(value)) {
       setText(elem, value);
     } else if ((/^(pre|code)$/i).test(elem.tagName)) {
       setText(elem, value);
     } else {
       elem.innerHTML = value;
+    }
+  },
+
+  /**
+   * Set the value of the specified form element to the provided value.
+   * @param {HTMLElement} elem The form element whose value is to be set.
+   * @praam {mixed} value The value to set.
+   */
+  setFormVal = val.setFormVal = function(elem, value) {
+    if (elem.tagName.toLowerCase() === 'input' && elem.getAttribute('type') === 'checkbox') {
+      elem.checked = !!value;
+    } else {
+      elem.value = value;
     }
   },
   
