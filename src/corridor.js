@@ -916,20 +916,17 @@ var
     
     var
       tag = elem.tagName.toLowerCase(),
-      type = (tag === 'input') ? elem.getAttribute('type') || 'text' : tag,
-      miss = {},
-      val = (
-        type === 'checkbox' ? elem.checked :
-        type === 'select' ? elem.options[elem.selectedIndex].value :
-        'value' in elem ? elem.value :
-        miss
-      );
+      type = (tag === 'input') ? elem.getAttribute('type') || 'text' : tag;
     
-    if (val === miss) {
-      throw Error("There is no known way to extract a value from the specified element.");
+    if (type === 'checkbox') {
+      return elem.checked;
+    } else if (type === 'select') {
+      return elem.selectedIndex !== -1 ? elem.options[elem.selectedIndex].value : null;
+    } else if ('value' in elem) {
+      return elem.value;
     }
     
-    return val;
+    throw Error("There is no known way to extract a value from the specified element.");
   },
   
   /**
